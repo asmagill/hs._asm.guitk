@@ -55,7 +55,7 @@ static void defineInternalDictionaryies() {
 
 - (void)callbackHamster:(NSArray *)messageParts { // does the "heavy lifting"
     if (_callbackRef != LUA_NOREF) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
         [skin pushLuaRef:refTable ref:_callbackRef] ;
         for (id part in messageParts) [skin pushNSObject:part] ;
         if (![skin protectedCallAndTraceback:(int)messageParts.count nresults:0]) {
@@ -65,7 +65,7 @@ static void defineInternalDictionaryies() {
         }
     } else {
         // allow next responder a chance since we don't have a callback set
-        id nextInChain = [self nextResponder] ;
+        NSObject *nextInChain = [self nextResponder] ;
         if (nextInChain) {
             SEL passthroughCallback = NSSelectorFromString(@"performPassthroughCallback:") ;
             if ([nextInChain respondsToSelector:passthroughCallback]) {
@@ -113,7 +113,7 @@ static void defineInternalDictionaryies() {
 ///
 ///  * The initial date and time represented by the element will be the date and time when this function is invoked.  See [hs._asm.guitk.element.datepicker:date](#date).
 static int datepicker_new(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
 
     NSRect frameRect = (lua_gettop(L) == 1) ? [skin tableToRectAtIndex:1] : NSZeroRect ;
@@ -154,7 +154,7 @@ static int datepicker_new(lua_State *L) {
 ///      * the message string "dateDidChange" indicating that the user has modified the date or time in the datepicker element.
 ///      * a number representing the selected date as the number of seconds since the epoch -- see [hs._asm.guitk.element.datepicker:date](#date)
 static int datepicker_callback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TFUNCTION | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementDatePicker *picker = [skin toNSObjectAtIndex:1] ;
 
@@ -188,7 +188,7 @@ static int datepicker_callback(lua_State *L) {
 /// Notes:
 ///  * Setting this to true will set [hs._asm.guitk.element.datepicker:bezeled](#bezeled) to false.
 static int datepicker_bordered(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementDatePicker *picker = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 1) {
@@ -213,7 +213,7 @@ static int datepicker_bordered(lua_State *L) {
 /// Notes:
 ///  * Setting this to true will set [hs._asm.guitk.element.datepicker:bordered](#bordered) to false.
 static int datepicker_bezeled(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementDatePicker *picker = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 1) {
@@ -238,7 +238,7 @@ static int datepicker_bezeled(lua_State *L) {
 /// Notes:
 ///  * Setting this to true will draw the background of the element with the color specified with [hs._asm.guitk.element.datepicker:backgroundColor](#backgroundColor).
 static int datepicker_drawsBackground(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementDatePicker *picker = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 1) {
@@ -264,7 +264,7 @@ static int datepicker_drawsBackground(lua_State *L) {
 ///  * The background color will only be drawn when [hs._asm.guitk.element.datepicker:drawsBackground](#drawsBackground) is true.
 ///  * If [hs._asm.guitk.element.datepicker:pickerStyle](#pickerStyle) is "textField" or "textFieldAndStepper", this will set the background of the text field. If it is "clockAndColor", only the calendar's background color will be set.
 static int datepicker_backgroundColor(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementDatePicker *picker = [skin toNSObjectAtIndex:1] ;
 
@@ -290,7 +290,7 @@ static int datepicker_backgroundColor(lua_State *L) {
 /// Notes:
 ///  * This method only affects the text color when [hs._asm.guitk.element.datepicker:pickerStyle](#pickerStyle) is "textField" or "textFieldAndStepper".
 static int datepicker_textColor(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementDatePicker *picker = [skin toNSObjectAtIndex:1] ;
 
@@ -318,7 +318,7 @@ static int datepicker_textColor(lua_State *L) {
 ///
 ///  * When the user has selected a date range, the first date in the range will be available in [hs._asm.guitk.element.datepicker:date](#date) and the interval between the start and end date will be the number of seconds returned by [hs._asm.guitk.element.datepicker:timeInterval](#timeInterval)
 static int datepicker_datePickerMode(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementDatePicker *picker = [skin toNSObjectAtIndex:1] ;
 
@@ -344,7 +344,7 @@ static int datepicker_datePickerMode(lua_State *L) {
 /// Returns:
 ///  * if a value is provided, returns the datepickerObject ; otherwise returns the current value.
 static int datepicker_datePickerStyle(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementDatePicker *picker = [skin toNSObjectAtIndex:1] ;
 
@@ -389,7 +389,7 @@ static int datepicker_datePickerStyle(lua_State *L) {
 /// Returns:
 ///  * if a value is provided, returns the datepickerObject ; otherwise returns the current value.
 static int datepicker_datePickerElements(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementDatePicker *picker = [skin toNSObjectAtIndex:1] ;
 
@@ -477,7 +477,7 @@ static int datepicker_datePickerElements(lua_State *L) {
 /// Notes:
 ///  * See `hs.host.locale.availableLocales` for a list of locales available.
 static int datepicker_locale(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementDatePicker *picker = [skin toNSObjectAtIndex:1] ;
 
@@ -510,7 +510,7 @@ static int datepicker_locale(lua_State *L) {
 /// Notes:
 ///  * See [hs._asm.guitk.element.datepicker.timezoneNames](#timezoneNames) and [hs._asm.guitk.element.datepicker.timezoneAbbreviations](#timezoneAbbreviations) for valid strings that can be used with this method.
 static int datepicker_timezone(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TNUMBER | LS_TINTEGER | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementDatePicker *picker = [skin toNSObjectAtIndex:1] ;
 
@@ -551,7 +551,7 @@ static int datepicker_timezone(lua_State *L) {
 /// Notes:
 ///  * See [hs._asm.guitk.element.datepicker.calendarIdentifiers](#calendarIdentifiers) for valid strings that can be used with this method.
 static int datepicker_calendar(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING  | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementDatePicker *picker = [skin toNSObjectAtIndex:1] ;
 
@@ -587,7 +587,7 @@ static int datepicker_calendar(lua_State *L) {
 ///  * If the user selects a range of dates in the calendar portion of the datepicker element, this number will be a multiple of 86400, the number of seconds in a day.
 ///  * If you set a value with this method, it should be a multiple of 86400 - fractions of a day will not be visible or adjustable within the datepicker element.
 static int datepicker_timeInterval(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementDatePicker *picker = [skin toNSObjectAtIndex:1] ;
 
@@ -615,7 +615,7 @@ static int datepicker_timeInterval(lua_State *L) {
 ///
 ///  * When [hs._asm.guitk.element.datepicker:dateRangeMode](#dateRangeMode) is true, the end date of the range can be calculated as `hs._asm.guitk.element.datepicker:date() + hs._asm.guitk.element.datepicker:timeInterval()`.
 static int datepicker_dateValue(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementDatePicker *picker = [skin toNSObjectAtIndex:1] ;
 
@@ -646,7 +646,7 @@ static int datepicker_dateValue(lua_State *L) {
 /// Notes:
 ///  * The behavior is undefined If a value is set with this method and it is less than the value of [hs._asm.guitk.element.datepicker:minDate](#minDate).
 static int datepicker_maxDate(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementDatePicker *picker = [skin toNSObjectAtIndex:1] ;
 
@@ -681,7 +681,7 @@ static int datepicker_maxDate(lua_State *L) {
 /// Notes:
 ///  * The behavior is undefined If a value is set with this method and it is greater than the value of [hs._asm.guitk.element.datepicker:maxDate](#maxDate).
 static int datepicker_minDate(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementDatePicker *picker = [skin toNSObjectAtIndex:1] ;
 
@@ -713,7 +713,7 @@ static int datepicker_minDate(lua_State *L) {
 ///
 /// This constant has a `__tostring` metamethod defined so that you can type `require("hs._asm.guitk").element.datepicker.calendarIdentifiers` into the Hammerspoon console to see its contents.
 static int pushCalendarIdentifiers(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     lua_newtable(L) ;
     [skin pushNSObject:NSCalendarIdentifierGregorian] ;           lua_rawseti(L, -2, luaL_len(L, -2) + 1) ;
     [skin pushNSObject:NSCalendarIdentifierBuddhist] ;            lua_rawseti(L, -2, luaL_len(L, -2) + 1) ;
@@ -749,7 +749,7 @@ static int pushHSASMGUITKElementDatePicker(lua_State *L, id obj) {
 }
 
 id toHSASMGUITKElementDatePickerFromLua(lua_State *L, int idx) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementDatePicker *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {
         value = get_objectFromUserdata(__bridge HSASMGUITKElementDatePicker, L, idx, USERDATA_TAG) ;
@@ -763,7 +763,7 @@ id toHSASMGUITKElementDatePickerFromLua(lua_State *L, int idx) {
 #pragma mark - Hammerspoon/Lua Infrastructure
 
 static int userdata_tostring(lua_State* L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementDatePicker *obj = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKElementDatePicker"] ;
     NSString *title = NSStringFromRect(obj.frame) ;
     [skin pushNSObject:[NSString stringWithFormat:@"%s: %@ (%p)", USERDATA_TAG, title, lua_topointer(L, 1)]] ;
@@ -774,7 +774,7 @@ static int userdata_eq(lua_State* L) {
 // can't get here if at least one of us isn't a userdata type, and we only care if both types are ours,
 // so use luaL_testudata before the macro causes a lua error
     if (luaL_testudata(L, 1, USERDATA_TAG) && luaL_testudata(L, 2, USERDATA_TAG)) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:L] ;
         HSASMGUITKElementDatePicker *obj1 = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKElementDatePicker"] ;
         HSASMGUITKElementDatePicker *obj2 = [skin luaObjectAtIndex:2 toClass:"HSASMGUITKElementDatePicker"] ;
         lua_pushboolean(L, [obj1 isEqualTo:obj2]) ;
@@ -789,7 +789,7 @@ static int userdata_gc(lua_State* L) {
     if (obj) {
         obj.selfRefCount-- ;
         if (obj.selfRefCount == 0) {
-            LuaSkin *skin = [LuaSkin shared] ;
+            LuaSkin *skin = [LuaSkin sharedWithState:L] ;
             obj.callbackRef = [skin luaUnref:refTable ref:obj.callbackRef] ;
             obj = nil ;
         }
@@ -844,7 +844,7 @@ static luaL_Reg moduleLib[] = {
 int luaopen_hs__asm_guitk_element_datepicker(lua_State* L) {
     defineInternalDictionaryies() ;
 
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     refTable = [skin registerLibraryWithObject:USERDATA_TAG
                                      functions:moduleLib
                                  metaFunctions:nil    // or module_metaLib

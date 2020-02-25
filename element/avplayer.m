@@ -96,7 +96,7 @@ static void defineInternalDictionaryies() {
 
 - (void)passCallbackUpWith:(NSArray *)arguments {
     // allow next responder a chance since we don't have a callback set
-    id nextInChain = [self nextResponder] ;
+    NSObject *nextInChain = [self nextResponder] ;
     if (nextInChain) {
         SEL passthroughCallback = NSSelectorFromString(@"performPassthroughCallback:") ;
         if ([nextInChain respondsToSelector:passthroughCallback]) {
@@ -110,7 +110,7 @@ static void defineInternalDictionaryies() {
 - (void)didFinishPlaying:(__unused NSNotification *)notification {
     if (_trackCompleted) {
         if (_callbackRef != LUA_NOREF) {
-            LuaSkin *skin = [LuaSkin shared] ;
+            LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
             lua_State *L = [skin L] ;
             [skin pushLuaRef:refTable ref:self->_callbackRef] ;
             [skin pushNSObject:self] ;
@@ -130,7 +130,7 @@ static void defineInternalDictionaryies() {
     if (_trackRate && context == myKVOContext && [keyPath isEqualToString:@"rate"]) {
         NSString *message = (self.player.rate == 0.0f) ? @"pause" : @"play" ;
         if (_callbackRef != LUA_NOREF) {
-            LuaSkin *skin = [LuaSkin shared] ;
+            LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
             lua_State *L  = [skin L] ;
             [skin pushLuaRef:refTable ref:_callbackRef] ;
             [skin pushNSObject:self] ;
@@ -165,7 +165,7 @@ static void defineInternalDictionaryies() {
         }
 
         if (_callbackRef != LUA_NOREF) {
-            LuaSkin *skin = [LuaSkin shared] ;
+            LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
             lua_State *L  = [skin L] ;
             [skin pushLuaRef:refTable ref:_callbackRef] ;
             for (id item in args) [skin pushNSObject:item] ;
@@ -195,7 +195,7 @@ static void defineInternalDictionaryies() {
     } ;
 
     if (_callbackRef != LUA_NOREF) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
         lua_State *L  = [skin L] ;
         [skin pushLuaRef:refTable ref:self->_callbackRef] ;
         [skin pushNSObject:self] ;
@@ -243,7 +243,7 @@ static void defineInternalDictionaryies() {
 /// Notes:
 ///  * In most cases, setting the frame is not necessary and will be overridden when the element is assigned to a manager or to a `hs._asm.guitk` window.
 static int avplayer_new(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
 
     NSRect frameRect = (lua_gettop(L) == 1) ? [skin tableToRectAtIndex:1] : NSZeroRect ;
@@ -277,7 +277,7 @@ static int avplayer_new(lua_State *L) {
 /// Returns:
 ///  * if an argument is provided, the avplayerObject; otherwise the current value.
 static int avplayer_controlsStyle(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
 
@@ -314,7 +314,7 @@ static int avplayer_controlsStyle(lua_State *L) {
 /// Returns:
 ///  * if an argument is provided, the avplayerObject; otherwise the current value.
 static int avplayer_showsFrameSteppingButtons(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
 
@@ -341,7 +341,7 @@ static int avplayer_showsFrameSteppingButtons(lua_State *L) {
 /// Notes:
 ///  * If only a number is provided, the text "Chapter #" is displayed.  If a string is also provided, "#. string" is displayed.
 static int avplayer_flashChapterAndTitle(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG,
                     LS_TNUMBER | LS_TINTEGER,
                     LS_TSTRING | LS_TOPTIONAL,
@@ -368,7 +368,7 @@ static int avplayer_flashChapterAndTitle(lua_State *L) {
 /// Note:
 ///  * this method currently does not work; fixing this is in the TODO list.
 static int avplayer_pauseWhenHidden(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
 
@@ -407,7 +407,7 @@ static int avplayer_pauseWhenHidden(lua_State *L) {
 // ///    * `actionMenu` - [hs._asm.guitk.element.avplayer:actionMenu](#actionMenu)
 
 static int avplayer_callback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared];
+    LuaSkin *skin = [LuaSkin sharedWithState:L];
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TFUNCTION | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
 
@@ -446,7 +446,7 @@ static int avplayer_callback(lua_State *L) {
 // ///    * the `title` field of the menu item selected
 // ///    * a table containing the following keys set to true or false indicating which key modifiers were down when the menu item was selected: "cmd", "shift", "alt", "ctrl", and "fn".
 // static int avplayer_actionMenu(lua_State *L) {
-//     LuaSkin *skin = [LuaSkin shared];
+//     LuaSkin *skin = [LuaSkin sharedWithState:L];
 //     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TTABLE | LS_TNIL, LS_TBREAK] ;
 //     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
 //
@@ -488,7 +488,7 @@ static int avplayer_callback(lua_State *L) {
 ///  * If the path or URL are malformed, unreachable, or otherwise unavailable, [hs._asm.guitk.element.avplayer:status](#status) will return "failed".
 ///  * Because a remote URL may not respond immediately, you can also setup a callback with [hs._asm.guitk.element.avplayer:trackStatus](#trackStatus) to be notified when the item has loaded or if it has failed.
 static int avplayer_load(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TNIL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayer         *player = playerView.player ;
@@ -551,7 +551,7 @@ static int avplayer_load(lua_State *L) {
 /// Notes:
 ///  * this is equivalent to setting the rate to 1.0 (see [hs._asm.guitk.element.avplayer:rate](#rate)`)
 static int avplayer_play(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayer         *player = playerView.player ;
@@ -577,7 +577,7 @@ static int avplayer_play(lua_State *L) {
 /// Notes:
 ///  * this is equivalent to setting the rate to 0.0 (see [hs._asm.guitk.element.avplayer:rate](#rate)`)
 static int avplayer_pause(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayer         *player = playerView.player ;
@@ -609,7 +609,7 @@ static int avplayer_pause(lua_State *L) {
 ///    * Rates between 0.0 and -1.0 are allowed if [hs._asm.guitk.element.avplayer:playbackInformation](#playbackInformation) returns true for the `canPlaySlowReverse` field
 ///    * Rates less than -1.0 are allowed if [hs._asm.guitk.element.avplayer:playbackInformation](#playbackInformation) returns true for the `canPlayFastReverse` field
 static int avplayer_rate(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayer         *player = playerView.player ;
@@ -633,7 +633,7 @@ static int avplayer_rate(lua_State *L) {
 /// Returns:
 ///  * if an argument is provided, the avplayerObject; otherwise the current value.
 static int avplayer_mute(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayer         *player = playerView.player ;
@@ -657,7 +657,7 @@ static int avplayer_mute(lua_State *L) {
 /// Returns:
 ///  * if an argument is provided, the avplayerObject; otherwise the current value.
 static int avplayer_volume(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayer         *player = playerView.player ;
@@ -682,7 +682,7 @@ static int avplayer_volume(lua_State *L) {
 /// Returns:
 ///  * if an argument is provided, the avplayerObject; otherwise the current value.
 static int avplayer_closedCaptionDisplayEnabled(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayer         *player = playerView.player ;
@@ -714,7 +714,7 @@ static int avplayer_closedCaptionDisplayEnabled(lua_State *L) {
 ///
 ///  * From Apple Documentation: The block is invoked periodically at the interval specified, interpreted according to the timeline of the current item. The block is also invoked whenever time jumps and whenever playback starts or stops. If the interval corresponds to a very short interval in real time, the player may invoke the block less frequently than requested. Even so, the player will invoke the block sufficiently often for the client to update indications of the current time appropriately in its end-user interface.
 static int avplayer_trackProgress(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared];
+    LuaSkin *skin = [LuaSkin sharedWithState:L];
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayer         *player     = playerView.player ;
@@ -775,7 +775,7 @@ static int avplayer_trackProgress(lua_State *L) {
 ///
 ///  * Not all media content can have its playback rate changed; attempts to do so will invoke the callback twice -- once signifying that the change was made, and a second time indicating that the rate of play was reset back to the limits of the media content.  See [hs._asm:rate](#rate) for more information.
 static int avplayer_trackRate(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared];
+    LuaSkin *skin = [LuaSkin sharedWithState:L];
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayer         *player     = playerView.player ;
@@ -820,7 +820,7 @@ static int avplayer_trackRate(lua_State *L) {
 ///    * "canPlaySlowForward"     - A Boolean value indicating whether the item can be played at a rate between 0.0 and 1.0.
 ///    * "canPlaySlowReverse"     - A Boolean value indicating whether the item can be played at a rate between -1.0 and 0.0.
 static int avplayer_playbackInformation(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayerItem     *playerItem = playerView.player.currentItem ;
@@ -858,7 +858,7 @@ static int avplayer_playbackInformation(lua_State *L) {
 ///    * "readyToPlay" - The content has been loaded or sufficiently buffered so that playback may begin
 ///    * "failed"      - There was an error loading the content; a second return value will contain a string which may contain more information about the error.
 static int avplayer_status(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayerItem     *playerItem = playerView.player.currentItem ;
@@ -903,7 +903,7 @@ static int avplayer_status(lua_State *L) {
 ///    * the avplayerObject
 ///    * "finished"
 static int avplayer_trackCompleted(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared];
+    LuaSkin *skin = [LuaSkin sharedWithState:L];
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayerItem     *playerItem = playerView.player.currentItem ;
@@ -947,7 +947,7 @@ static int avplayer_trackCompleted(lua_State *L) {
 ///    * a string matching one of the states described in [hs._asm.guitk.element.avplayer:status](#status)
 ///    * if the state reported is failed, an error message describing the error that occurred.
 static int avplayer_trackStatus(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared];
+    LuaSkin *skin = [LuaSkin sharedWithState:L];
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayerItem     *playerItem = playerView.player.currentItem ;
@@ -982,7 +982,7 @@ static int avplayer_trackStatus(lua_State *L) {
 /// Returns:
 ///  * the current position, in seconds, within the audiovisual media content, or `nil` if no media content is currently loaded.
 static int avplayer_currentTime(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayerItem     *playerItem = playerView.player.currentItem ;
@@ -1018,7 +1018,7 @@ static int avplayer_currentTime(lua_State *L) {
 ///  end
 /// ~~~
 static int avplayer_duration(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayerItem     *playerItem = playerView.player.currentItem ;
@@ -1049,7 +1049,7 @@ static int avplayer_duration(lua_State *L) {
 ///    * the current time, in seconds, specifying the current playback position in the media content
 ///    * `true` if the seek operation was allowed to complete, or `false` if it was interrupted (for example by another seek request).
 static int avplayer_seekToTime(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared];
+    LuaSkin *skin = [LuaSkin sharedWithState:L];
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayerItem     *playerItem = playerView.player.currentItem ;
@@ -1097,7 +1097,7 @@ static int avplayer_seekToTime(lua_State *L) {
 /// Notes:
 ///  * This method is considered experimental and may or may not function as intended; use with caution and please report any reproducible errors or crashes that you encounter.
 static int avplayer_showsSharingServiceButton(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
 
@@ -1123,7 +1123,7 @@ static int avplayer_showsSharingServiceButton(lua_State *L) {
 /// Notes:
 ///  * This method is considered experimental and may or may not function as intended; use with caution and please report any reproducible errors or crashes that you encounter.
 static int avplayer_showsFullScreenToggleButton(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
 
@@ -1151,7 +1151,7 @@ static int avplayer_showsFullScreenToggleButton(lua_State *L) {
 ///
 ///  * External playback via AirPlay is only available in macOS 10.11 and newer.
 static int avplayer_allowsExternalPlayback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayer         *player = playerView.player ;
@@ -1195,7 +1195,7 @@ static int avplayer_allowsExternalPlayback(lua_State *L) {
 ///
 ///  * External playback via AirPlay is only available in macOS 10.11 and newer.
 static int avplayer_externalPlaybackActive(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK] ;
     HSASMGUITKElementAVPlayer *playerView = [skin toNSObjectAtIndex:1] ;
     AVPlayer         *player = playerView.player ;
@@ -1228,7 +1228,7 @@ static int pushHSASMGUITKElementAVPlayer(lua_State *L, id obj) {
 }
 
 id toHSASMGUITKElementAVPlayerFromLua(lua_State *L, int idx) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementAVPlayer *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {
         value = get_objectFromUserdata(__bridge HSASMGUITKElementAVPlayer, L, idx, USERDATA_TAG) ;
@@ -1242,7 +1242,7 @@ id toHSASMGUITKElementAVPlayerFromLua(lua_State *L, int idx) {
 #pragma mark - Hammerspoon/Lua Infrastructure
 
 static int userdata_tostring(lua_State* L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementAVPlayer *obj = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKElementAVPlayer"] ;
     NSString *title = NSStringFromRect(obj.frame) ;
     [skin pushNSObject:[NSString stringWithFormat:@"%s: %@ (%p)", USERDATA_TAG, title, lua_topointer(L, 1)]] ;
@@ -1253,7 +1253,7 @@ static int userdata_eq(lua_State* L) {
 // can't get here if at least one of us isn't a userdata type, and we only care if both types are ours,
 // so use luaL_testudata before the macro causes a lua error
     if (luaL_testudata(L, 1, USERDATA_TAG) && luaL_testudata(L, 2, USERDATA_TAG)) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:L] ;
         HSASMGUITKElementAVPlayer *obj1 = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKElementAVPlayer"] ;
         HSASMGUITKElementAVPlayer *obj2 = [skin luaObjectAtIndex:2 toClass:"HSASMGUITKElementAVPlayer"] ;
         lua_pushboolean(L, [obj1 isEqualTo:obj2]) ;
@@ -1268,7 +1268,7 @@ static int userdata_gc(lua_State* L) {
     if (obj) {
         obj.selfRefCount-- ;
         if (obj.selfRefCount == 0) {
-            LuaSkin *skin = [LuaSkin shared] ;
+            LuaSkin *skin = [LuaSkin sharedWithState:L] ;
             obj.callbackRef = [skin luaUnref:refTable ref:obj.callbackRef] ;
             if (obj.periodicObserver) {
                 [obj.player removeTimeObserver:obj.periodicObserver] ;
@@ -1355,7 +1355,7 @@ static luaL_Reg moduleLib[] = {
 int luaopen_hs__asm_guitk_element_avplayer(lua_State* L) {
     defineInternalDictionaryies() ;
 
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     refTable = [skin registerLibraryWithObject:USERDATA_TAG
                                      functions:moduleLib
                                  metaFunctions:nil    // or module_metaLib

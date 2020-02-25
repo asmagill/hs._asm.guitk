@@ -1,3 +1,8 @@
+-- maybe save some pain, if the shim is installed; otherwise, expect an objc dump to console when this loads on stock Hammerspoon without pull #2308 applied
+if package.searchpath("hs._asm.coroutineshim", package.path) then
+    require"hs._asm.coroutineshim"
+end
+
 --- === hs._asm.guitk ===
 ---
 --- This module provides a window or panel which can be used to display a variety of graphical elements defined in the submodules or other Hammerspoon modules.

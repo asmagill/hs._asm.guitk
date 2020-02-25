@@ -107,7 +107,7 @@ static inline NSRect RectWithFlippedYCoordinate(NSRect theRect) {
 }
 
 - (BOOL)windowShouldClose:(id __unused)sender {
-    if ((self.styleMask & NSClosableWindowMask) != 0) {
+    if ((self.styleMask & NSWindowStyleMaskClosable) != 0) {
         return YES ;
     } else {
         return NO ;
@@ -155,7 +155,7 @@ static inline NSRect RectWithFlippedYCoordinate(NSRect theRect) {
 // perform callback for subviews which don't have a callback defined; see manager/internal.m for how to allow this chaining
 - (void)performPassthroughCallback:(NSArray *)arguments {
     if (_passthroughCallbackRef != LUA_NOREF) {
-        LuaSkin *skin    = [LuaSkin shared] ;
+        LuaSkin *skin    = [LuaSkin sharedWithState:NULL] ;
         int     argCount = 1 ;
 
         [skin pushLuaRef:refTable ref:_passthroughCallbackRef] ;
@@ -178,7 +178,7 @@ static inline NSRect RectWithFlippedYCoordinate(NSRect theRect) {
     if (_notificationCallback != LUA_NOREF && [_notifyFor containsObject:message]) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if (self->_notificationCallback != LUA_NOREF) {
-                LuaSkin *skin = [LuaSkin shared] ;
+                LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
                 [skin pushLuaRef:refTable ref:self->_notificationCallback] ;
                 [skin pushNSObject:notification.object] ;
                 [skin pushNSObject:message] ;
@@ -272,7 +272,7 @@ static inline NSRect RectWithFlippedYCoordinate(NSRect theRect) {
 }
 - (void)windowWillClose:(NSNotification *)notification {
     [self performNotificationCallbackFor:@"willClose" with:notification] ;
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
     lua_State *L = [skin L] ;
     if (_deleteOnClose) {
         lua_pushcfunction(L, userdata_gc) ;
@@ -308,7 +308,7 @@ static inline NSRect RectWithFlippedYCoordinate(NSRect theRect) {
 @end
 
 static int window_orderHelper(lua_State *L, NSWindowOrderingMode mode) {
-    LuaSkin *skin = [LuaSkin shared];
+    LuaSkin *skin = [LuaSkin sharedWithState:L];
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK | LS_TVARARG] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
     NSInteger relativeTo = 0 ;
@@ -338,7 +338,7 @@ static int window_orderHelper(lua_State *L, NSWindowOrderingMode mode) {
 /// Notes:
 ///  * a rect-table is a table with key-value pairs specifying the top-left coordinate on the screen of the guitk window (keys `x`  and `y`) and the size (keys `h` and `w`). The table may be crafted by any method which includes these keys, including the use of an `hs.geometry` object.
 static int window_new(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TTABLE, LS_TNUMBER | LS_TINTEGER | LS_TOPTIONAL, LS_TBREAK] ;
 
     NSUInteger windowStyle = (lua_gettop(L) == 2) ? (NSUInteger)lua_tointeger(L, 2)
@@ -376,7 +376,7 @@ static int window_new(lua_State *L) {
 /// Notes:
 ///  * Most controllable elements require keybaord focus even if they do not respond directly to keyboard input.
 static int guitk_allowTextEntry(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -402,7 +402,7 @@ static int guitk_allowTextEntry(lua_State *L) {
 /// Notes:
 ///  * setting this to true allows Lua garbage collection to release the window resources when the user closes the window.
 static int guitk_deleteOnClose(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -425,7 +425,7 @@ static int guitk_deleteOnClose(lua_State *L) {
 /// Returns:
 ///  * If an argument is provided, the guitk object; otherwise the current value.
 static int window_alphaValue(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared];
+    LuaSkin *skin = [LuaSkin sharedWithState:L];
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -449,7 +449,7 @@ static int window_alphaValue(lua_State *L) {
 /// Returns:
 ///  * If an argument is provided, the guitk object; otherwise the current value.
 static int window_backgroundColor(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -472,7 +472,7 @@ static int window_backgroundColor(lua_State *L) {
 /// Returns:
 ///  * If an argument is provided, the guitk object; otherwise the current value.
 static int window_hasShadow(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -495,7 +495,7 @@ static int window_hasShadow(lua_State *L) {
 /// Returns:
 ///  * If an argument is provided, the guitk object; otherwise the current value.
 static int window_opaque(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -522,7 +522,7 @@ static int window_opaque(lua_State *L) {
 ///  * Setting this to true will prevent elements in the window from receiving mouse button events or mouse movement events which affect the focus of the window or its elements. For elements which accept keyboard entry, this *may* also prevent the user from focusing the element for keyboard input unless the element is focused programmatically with [hs._asm.guitk:activeElement](#activeElement).
 ///  * Mouse tracking events (see `hs._asm.guitk.manager:mouseCallback`) will still occur, even if this is true; however if two windows at the same level (see [hs._asm.guitk:level](#level)) both occupy the current mouse location and one or both of the windows have this attribute set to false, spurious and unpredictable mouse callbacks may occur as the "frontmost" window changes based on which is acting on the event at that instant in time.
 static int window_ignoresMouseEvents(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -537,7 +537,7 @@ static int window_ignoresMouseEvents(lua_State *L) {
 
 static int window_styleMask(lua_State *L) {
 // NOTE:  This method is wrapped in init.lua
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TINTEGER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -572,7 +572,7 @@ static int window_styleMask(lua_State *L) {
 /// Returns:
 ///  * If an argument is provided, the guitk object; otherwise the current value.
 static int window_title(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -595,7 +595,7 @@ static int window_title(lua_State *L) {
 /// Returns:
 ///  * If an argument is provided, the guitk object; otherwise the current value.
 static int window_titlebarAppearsTransparent(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -621,7 +621,7 @@ static int window_titlebarAppearsTransparent(lua_State *L) {
 /// Notes:
 ///  * NOT IMPLEMENTED YET - When a toolbar is attached to the guitk window (see the `hs.webview.toolbar` module documentation), this function can be used to specify whether the Toolbar appears underneath the window's title ("visible") or in the window's title bar itself, as seen in applications like Safari ("hidden").
 static int window_titleVisibility(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -668,7 +668,7 @@ static int window_titleVisibility(lua_State *L) {
 ///    * "dark"  is shorthand for "NSAppearanceNameVibrantDark" and can be used to mimic the macOS dark mode.
 ///  * This method will return an error if the string provided does not correspond to a recognized appearance theme.
 static int appearanceCustomization_appearance(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -718,7 +718,7 @@ static int appearanceCustomization_appearance(lua_State *L) {
 /// Notes:
 ///  * If this is set to true, Escape will only close the window if no other element responds to the Escape key first (e.g. if you are editing a textfield element, the Escape will be captured by the text field, not by the guitk window.)
 static int guitk_closeOnEscape(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -747,7 +747,7 @@ static int guitk_closeOnEscape(lua_State *L) {
 ///
 ///  * See also [hs._asm.guitk:animationDuration](#animationDuration).
 static int window_frame(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared];
+    LuaSkin *skin = [LuaSkin sharedWithState:L];
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK | LS_TVARARG] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -780,7 +780,7 @@ static int window_frame(lua_State *L) {
 ///
 ///  * See also [hs._asm.guitk:animationDuration](#animationDuration).
 static int window_topLeft(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared];
+    LuaSkin *skin = [LuaSkin sharedWithState:L];
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK | LS_TVARARG] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -814,7 +814,7 @@ static int window_topLeft(lua_State *L) {
 ///
 ///  * See also [hs._asm.guitk:animationDuration](#animationDuration).
 static int window_size(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared];
+    LuaSkin *skin = [LuaSkin sharedWithState:L];
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK | LS_TVARARG] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -850,7 +850,7 @@ static int window_size(lua_State *L) {
 /// Notes:
 ///  * This animation is separate from the fade-in and fade-out options provided with the [hs._asm.guitk:show](#show), [hs._asm.guitk:hide](#hide), and [hs._asm.guitk:delete](#delete) methods and is provided by the macOS operating system itself.
 static int window_animationBehavior(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -893,7 +893,7 @@ static int window_animationBehavior(lua_State *L) {
 /// Returns:
 ///  * If an argument is provided, the guitk object; otherwise the current value.
 static int guitk_animationDuration(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -912,13 +912,13 @@ static int guitk_animationDuration(lua_State *L) {
 
 static int window_collectionBehavior(lua_State *L) {
 // NOTE:  This method is wrapped in init.lua
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TINTEGER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
     NSWindowCollectionBehavior oldBehavior = window.collectionBehavior ;
     if (lua_gettop(L) == 1) {
-        lua_pushinteger(L, oldBehavior) ;
+        lua_pushinteger(L, (lua_Integer)oldBehavior) ;
     } else {
         @try {
             window.collectionBehavior = (NSUInteger)lua_tointeger(L, 2) ;
@@ -945,7 +945,7 @@ static int window_collectionBehavior(lua_State *L) {
 /// Notes:
 ///  * This method is automatically called during garbage collection, notably during a Hammerspoon termination or reload, with a fade time of 0.
 static int guitk_delete(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -974,7 +974,7 @@ static int guitk_delete(lua_State *L) {
 /// Returns:
 ///  * The guitk object
 static int guitk_hide(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -998,7 +998,7 @@ static int guitk_hide(lua_State *L) {
 /// Returns:
 ///  * The guitk object
 static int guitk_show(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -1028,7 +1028,7 @@ static int guitk_show(lua_State *L) {
 ///  * If you specify an empty string (e.g. ""), the default value for this window based upon its properties will be returned when queried.
 ///  * If you specify nil (the default), then the default value for this window based upon its properties will have ".Hammerspoon" appended to the string and this combined value will be returned when queried.
 static int guitk_accessibilitySubrole(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -1055,7 +1055,7 @@ static int guitk_accessibilitySubrole(lua_State *L) {
 ///  * The function should expect two arguments: the guitkObject itself and a string specifying the type of notification. See [hs._asm.guitk:notificationMessages](#notificationMessages) and [hs._asm.guitk.notifications](#notifications).
 ///  * [hs._asm.guitk:simplifiedWindowCallback](#simplifiedWindowCallback) provides a wrapper to this method which conforms to the window notifications currently offered by `hs.webview`.
 static int guitk_notificationCallback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TFUNCTION | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -1092,7 +1092,7 @@ static int guitk_notificationCallback(lua_State *L) {
 ///  * When a new guitkObject is created, the messages are initially set to `{ "didBecomeKey", "didResignKey", "didResize", "didMove" }`
 ///  * See [hs._asm.guitk.notifications](#notifications) for possible notification messages that can be watched for.
 static int guitk_notificationWatchFor(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TTABLE | LS_TSTRING | LS_TOPTIONAL, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -1171,7 +1171,7 @@ static int window_orderBelow(lua_State *L) {
 
 static int window_level(lua_State *L) {
 // NOTE:  This method is wrapped in init.lua
-    LuaSkin *skin = [LuaSkin shared];
+    LuaSkin *skin = [LuaSkin sharedWithState:L];
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TINTEGER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -1199,7 +1199,7 @@ static int window_level(lua_State *L) {
 ///  * This method only determines whether or not the window is being shown or is hidden -- it does not indicate whether or not the window is currently off screen or is occluded by other objects.
 ///  * See also [hs._asm.guitk:isOccluded](#isOccluded).
 static int window_isShowing(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -1223,7 +1223,7 @@ static int window_isShowing(lua_State *L) {
 ///  * a window that is currently hidden or that has a height of 0 or a width of 0 is considered occluded.
 ///  * See also [hs._asm.guitk:isShowing](#isShowing).
 static int window_isOccluded(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -1250,7 +1250,7 @@ static int window_isOccluded(lua_State *L) {
 ///    * The element's size is the window's size -- you cannot specify a specific location for the element within the window or make it smaller than the window to give it a visual border.
 ///    * Only one element can be assigned at a time. For canvas, which has its own methods for handling multiple visual elements, this isn't necessarily an issue.
 static int window_contentView(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -1302,7 +1302,7 @@ static int window_contentView(lua_State *L) {
 ///
 ///  * Note that elements which have a callback that returns a response cannot use this common pass through callback method; in such cases a specific callback must be assigned to the element directly as described in the element's documentation.
 static int window_passthroughCallback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TFUNCTION | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -1340,7 +1340,7 @@ static int window_passthroughCallback(lua_State *L) {
 ///  * Passing an explicit nil to this method will make the content manager or guitk window itself the active element.
 ///    * Making the content manager or guitk window itself the active element has the visual effect of making no element active but leaving the window focus unchanged.
 static int window_firstResponder(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGuiWindow *window = [skin toNSObjectAtIndex:1] ;
 
@@ -1559,8 +1559,8 @@ static int window_windowMasksTable(lua_State *L) {
 /// Notes:
 ///  * Not all of the notifications here are currently fully supported and the specific details and support will change as this module and its submodules evolve and get fleshed out. Some may be removed if it is determined they will never be supported by this module while others may lead to additions when the need arises. Please post an issue or pull request if you would like to request specific support or provide additions yourself.
 
-static int window_notifications(__unused lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+static int window_notifications(lua_State *L) {
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     guitkNotifications = @[
         @"didBecomeKey",
         @"didBecomeMain",
@@ -1603,7 +1603,7 @@ static int window_notifications(__unused lua_State *L) {
 // delegates and blocks.
 
 static int pushHSASMGuiWindow(lua_State *L, id obj) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGuiWindow *value = obj;
     if (value.selfRef == LUA_NOREF) {
         void** valuePtr = lua_newuserdata(L, sizeof(HSASMGuiWindow *));
@@ -1617,7 +1617,7 @@ static int pushHSASMGuiWindow(lua_State *L, id obj) {
 }
 
 id toHSASMGuiWindowFromLua(lua_State *L, int idx) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGuiWindow *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {
         value = get_objectFromUserdata(__bridge HSASMGuiWindow, L, idx, USERDATA_TAG) ;
@@ -1631,7 +1631,7 @@ id toHSASMGuiWindowFromLua(lua_State *L, int idx) {
 #pragma mark - Hammerspoon/Lua Infrastructure
 
 static int userdata_tostring(lua_State* L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGuiWindow *obj = [skin luaObjectAtIndex:1 toClass:"HSASMGuiWindow"] ;
     NSString *title = obj.title ;
     [skin pushNSObject:[NSString stringWithFormat:@"%s: %@ @%@ (%p)", USERDATA_TAG, title, NSStringFromRect(RectWithFlippedYCoordinate(obj.frame)), lua_topointer(L, 1)]] ;
@@ -1642,7 +1642,7 @@ static int userdata_eq(lua_State* L) {
 // can't get here if at least one of us isn't a userdata type, and we only care if both types are ours,
 // so use luaL_testudata before the macro causes a lua error
     if (luaL_testudata(L, 1, USERDATA_TAG) && luaL_testudata(L, 2, USERDATA_TAG)) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:L] ;
         HSASMGuiWindow *obj1 = [skin luaObjectAtIndex:1 toClass:"HSASMGuiWindow"] ;
         HSASMGuiWindow *obj2 = [skin luaObjectAtIndex:2 toClass:"HSASMGuiWindow"] ;
         lua_pushboolean(L, [obj1 isEqualTo:obj2]) ;
@@ -1655,7 +1655,7 @@ static int userdata_eq(lua_State* L) {
 static int userdata_gc(lua_State* L) {
     HSASMGuiWindow *obj = get_objectFromUserdata(__bridge_transfer HSASMGuiWindow, L, 1, USERDATA_TAG) ;
     if (obj) {
-        LuaSkin *skin = [LuaSkin shared];
+        LuaSkin *skin = [LuaSkin sharedWithState:L];
         obj.selfRef                = [skin luaUnref:refTable ref:obj.selfRef] ;
         obj.notificationCallback   = [skin luaUnref:refTable ref:obj.notificationCallback] ;
         obj.passthroughCallbackRef = [skin luaUnref:refTable ref:obj.passthroughCallbackRef] ;
@@ -1733,7 +1733,7 @@ static luaL_Reg moduleLib[] = {
 // };
 
 int luaopen_hs__asm_guitk_internal(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     refTable = [skin registerLibraryWithObject:USERDATA_TAG
                                      functions:moduleLib
                                  metaFunctions:nil    // or module_metaLib

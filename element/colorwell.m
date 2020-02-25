@@ -48,7 +48,7 @@ static int refTable = LUA_NOREF;
 
 - (void)callbackHamster:(NSArray *)messageParts { // does the "heavy lifting"
     if (_callbackRef != LUA_NOREF) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
         [skin pushLuaRef:refTable ref:_callbackRef] ;
         for (id part in messageParts) [skin pushNSObject:part] ;
         if (![skin protectedCallAndTraceback:(int)messageParts.count nresults:0]) {
@@ -58,7 +58,7 @@ static int refTable = LUA_NOREF;
         }
     } else {
         // allow next responder a chance since we don't have a callback set
-        id nextInChain = [self nextResponder] ;
+        NSObject *nextInChain = [self nextResponder] ;
         if (nextInChain) {
             SEL passthroughCallback = NSSelectorFromString(@"performPassthroughCallback:") ;
             if ([nextInChain respondsToSelector:passthroughCallback]) {
@@ -102,7 +102,7 @@ static int refTable = LUA_NOREF;
 ///
 ///  * The colorwell element does not have a default height or width; when assigning the element to an `hs._asm.guitk.manager`, be sure to specify them in the frame details or the element may not be visible.
 static int colorwell_new(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
 
     NSRect frameRect = (lua_gettop(L) == 1) ? [skin tableToRectAtIndex:1] : NSZeroRect ;
@@ -132,7 +132,7 @@ static int colorwell_new(lua_State *L) {
 ///
 /// * The color picker is not unique to each element -- if you require the alpha channel for some colorwells but not others, make sure to call this function from the callback when the picker is opened for each specific colorwell element -- see [hs._asm.guitk.element.colorwell:callback](#callback).
 static int colorwell_ignoresAlpha(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
 
     if (lua_gettop(L) == 1) {
@@ -155,7 +155,7 @@ static int colorwell_ignoresAlpha(lua_State *L) {
 /// Notes:
 ///  * if a colorwell is currently the active element, invoking this function with a false argument will trigger the colorwell's close callback -- see [hs._asm.guitk.element.colorwell:callback](#callback).
 static int colorwell_pickerVisible(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
 
     NSColorPanel *picker = [NSColorPanel sharedColorPanel] ;
@@ -196,7 +196,7 @@ static int colorwell_pickerVisible(lua_State *L) {
 ///      * the message string "colorDidChange" indicating that the user has selected or modified the color currently chosen in the color picker panel.
 ///      * a table describing the currently selected color as defined by the `hs.drawing.color` module.
 static int colorwell_callback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TFUNCTION | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementColorWell *well = [skin toNSObjectAtIndex:1] ;
 
@@ -227,7 +227,7 @@ static int colorwell_callback(lua_State *L) {
 /// Returns:
 ///  * if a value is provided, returns the colorwellObject ; otherwise returns the current value.
 static int colorwell_bordered(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementColorWell *well = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 1) {
@@ -266,7 +266,7 @@ static int colorwell_bordered(lua_State *L) {
 ///  end)
 ///  ~~~
 static int colorwell_active(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementColorWell *well = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 1) {
@@ -295,7 +295,7 @@ static int colorwell_active(lua_State *L) {
 /// Notes:
 ///  * if assigning a new color and [hs._asm.guitk.element.colorwell.ignoresAlpha](#ignoresAlpha) is currently true, the alpha channel of the color will be ignored and internally changed to 1.0.
 static int colorwell_color(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementColorWell *well = [skin toNSObjectAtIndex:1] ;
 
@@ -325,7 +325,7 @@ static int pushHSASMGUITKElementColorWell(lua_State *L, id obj) {
 }
 
 id toHSASMGUITKElementColorWellFromLua(lua_State *L, int idx) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementColorWell *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {
         value = get_objectFromUserdata(__bridge HSASMGUITKElementColorWell, L, idx, USERDATA_TAG) ;
@@ -339,7 +339,7 @@ id toHSASMGUITKElementColorWellFromLua(lua_State *L, int idx) {
 #pragma mark - Hammerspoon/Lua Infrastructure
 
 static int userdata_tostring(lua_State* L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementColorWell *obj = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKElementColorWell"] ;
     NSString *title = NSStringFromRect(obj.frame) ;
     [skin pushNSObject:[NSString stringWithFormat:@"%s: %@ (%p)", USERDATA_TAG, title, lua_topointer(L, 1)]] ;
@@ -350,7 +350,7 @@ static int userdata_eq(lua_State* L) {
 // can't get here if at least one of us isn't a userdata type, and we only care if both types are ours,
 // so use luaL_testudata before the macro causes a lua error
     if (luaL_testudata(L, 1, USERDATA_TAG) && luaL_testudata(L, 2, USERDATA_TAG)) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:L] ;
         HSASMGUITKElementColorWell *obj1 = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKElementColorWell"] ;
         HSASMGUITKElementColorWell *obj2 = [skin luaObjectAtIndex:2 toClass:"HSASMGUITKElementColorWell"] ;
         lua_pushboolean(L, [obj1 isEqualTo:obj2]) ;
@@ -365,7 +365,7 @@ static int userdata_gc(lua_State* L) {
     if (obj) {
         obj.selfRefCount-- ;
         if (obj.selfRefCount == 0) {
-            LuaSkin *skin = [LuaSkin shared] ;
+            LuaSkin *skin = [LuaSkin sharedWithState:L] ;
             obj.callbackRef = [skin luaUnref:refTable ref:obj.callbackRef] ;
             obj = nil ;
         }
@@ -409,7 +409,7 @@ static const luaL_Reg module_metaLib[] = {
 };
 
 int luaopen_hs__asm_guitk_element_colorwell(lua_State* L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     refTable = [skin registerLibraryWithObject:USERDATA_TAG
                                      functions:moduleLib
                                  metaFunctions:module_metaLib

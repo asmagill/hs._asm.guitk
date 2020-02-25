@@ -106,7 +106,7 @@ static NSRect statusItemFrame(NSStatusItem *item) {
 
 - (void)performCallbackMessage:(NSString *)message with:(id)data {
     if (_callbackRef != LUA_NOREF) {
-        LuaSkin   *skin = [LuaSkin shared] ;
+        LuaSkin   *skin = [LuaSkin sharedWithState:NULL] ;
         lua_State *L    = skin.L ;
         int       count = 2 ;
         [skin pushLuaRef:refTable ref:_callbackRef] ;
@@ -145,7 +145,7 @@ static NSRect statusItemFrame(NSStatusItem *item) {
 - (BOOL)draggingCallback:(NSString *)message with:(id<NSDraggingInfo>)sender {
     BOOL isAllGood = NO ;
     if (_draggingCallbackRef != LUA_NOREF) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
         lua_State *L = skin.L ;
         int argCount = 2 ;
         [skin pushLuaRef:refTable ref:_draggingCallbackRef] ;
@@ -226,7 +226,7 @@ static NSRect statusItemFrame(NSStatusItem *item) {
 #pragma mark - Module Functions
 
 static int menubar_new(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TBOOLEAN | LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     CGFloat length = NSVariableStatusItemLength ;
     if (lua_gettop(L) == 1) {
@@ -248,7 +248,7 @@ static int menubar_new(lua_State *L) {
 #pragma mark - Module Methods
 
 static int menubar_delete(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK] ;
 //     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
 
@@ -263,7 +263,7 @@ static int menubar_delete(lua_State *L) {
 }
 
 static int menubar_length(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
     NSStatusItem        *item    = wrapper.item ;
@@ -286,8 +286,8 @@ static int menubar_length(lua_State *L) {
     return 1 ;
 }
 
-static int menubar_frame(lua_State __unused *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+static int menubar_frame(lua_State *L) {
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
     NSStatusItem        *item    = wrapper.item ;
@@ -296,7 +296,7 @@ static int menubar_frame(lua_State __unused *L) {
 }
 
 static int menubar_menu(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY | LS_TOPTIONAL, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
     NSStatusItem        *item    = wrapper.item ;
@@ -319,7 +319,7 @@ static int menubar_menu(lua_State *L) {
 }
 
 static int menubar_title(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY | LS_TOPTIONAL, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
     NSStatusItem        *item    = wrapper.item ;
@@ -345,7 +345,7 @@ static int menubar_title(lua_State *L) {
 }
 
 static int menubar_alternateTitle(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY | LS_TOPTIONAL, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
     NSStatusItem        *item    = wrapper.item ;
@@ -371,7 +371,7 @@ static int menubar_alternateTitle(lua_State *L) {
 }
 
 static int menubar_image(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG,  LS_TANY | LS_TOPTIONAL, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
     NSStatusItem        *item    = wrapper.item ;
@@ -392,7 +392,7 @@ static int menubar_image(lua_State *L) {
 }
 
 static int menubar_alternateImage(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG,  LS_TANY | LS_TOPTIONAL, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
     NSStatusItem        *item    = wrapper.item ;
@@ -413,7 +413,7 @@ static int menubar_alternateImage(lua_State *L) {
 }
 
 static int menubar_sound(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY | LS_TOPTIONAL, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
     NSStatusItem        *item    = wrapper.item ;
@@ -434,7 +434,7 @@ static int menubar_sound(lua_State *L) {
 }
 
 static int menubar_imagePosition(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
     NSStatusItem        *item    = wrapper.item ;
@@ -464,7 +464,7 @@ static int menubar_imagePosition(lua_State *L) {
 }
 
 static int menubar_imageScaling(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
     NSStatusItem        *item    = wrapper.item ;
@@ -494,7 +494,7 @@ static int menubar_imageScaling(lua_State *L) {
 }
 
 static int menubar_appearsDisabled(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
     NSStatusItem        *item    = wrapper.item ;
@@ -510,7 +510,7 @@ static int menubar_appearsDisabled(lua_State *L) {
 }
 
 static int menubar_visible(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
     NSStatusItem        *item    = wrapper.item ;
@@ -534,7 +534,7 @@ static int menubar_visible(lua_State *L) {
 }
 
 static int menubar_allowRemoval(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
     NSStatusItem        *item    = wrapper.item ;
@@ -563,7 +563,7 @@ static int menubar_allowRemoval(lua_State *L) {
 }
 
 static int menubar_enabled(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
     NSStatusItem        *item    = wrapper.item ;
@@ -579,7 +579,7 @@ static int menubar_enabled(lua_State *L) {
 }
 
 static int menubar_toolTip(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
     NSStatusItem        *item    = wrapper.item ;
@@ -599,7 +599,7 @@ static int menubar_toolTip(lua_State *L) {
 }
 
 static int menubar_callback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TFUNCTION | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
 
@@ -621,7 +621,7 @@ static int menubar_callback(lua_State *L) {
 }
 
 static int menubar_draggingCallback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TFUNCTION | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSStatusItemWrapper *wrapper = [skin toNSObjectAtIndex:1] ;
 
@@ -653,7 +653,7 @@ static int menubar_draggingCallback(lua_State *L) {
 // delegates and blocks.
 
 static int pushHSStatusItemWrapper(lua_State *L, id obj) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSStatusItemWrapper *value = obj;
     if (value.selfRef == LUA_NOREF) {
         void** valuePtr = lua_newuserdata(L, sizeof(HSStatusItemWrapper *));
@@ -667,7 +667,7 @@ static int pushHSStatusItemWrapper(lua_State *L, id obj) {
 }
 
 id toHSStatusItemWrapperFromLua(lua_State *L, int idx) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSStatusItemWrapper *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {
         value = get_objectFromUserdata(__bridge HSStatusItemWrapper, L, idx, USERDATA_TAG) ;
@@ -681,7 +681,7 @@ id toHSStatusItemWrapperFromLua(lua_State *L, int idx) {
 #pragma mark - Hammerspoon/Lua Infrastructure
 
 static int userdata_tostring(lua_State* L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSStatusItemWrapper *obj = [skin luaObjectAtIndex:1 toClass:"HSStatusItemWrapper"] ;
     NSString *title = NSStringFromRect(statusItemFrame(obj.item)) ;
     [skin pushNSObject:[NSString stringWithFormat:@"%s: %@ (%p)", USERDATA_TAG, title, lua_topointer(L, 1)]] ;
@@ -693,7 +693,7 @@ static int userdata_eq(lua_State* L) {
 // can't get here if at least one of us isn't a userdata type, and we only care if both types are ours,
 // so use luaL_testudata before the macro causes a lua error
     if (luaL_testudata(L, 1, USERDATA_TAG) && luaL_testudata(L, 2, USERDATA_TAG)) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:L] ;
         HSStatusItemWrapper *obj1 = [skin luaObjectAtIndex:1 toClass:"HSStatusItemWrapper"] ;
         HSStatusItemWrapper *obj2 = [skin luaObjectAtIndex:2 toClass:"HSStatusItemWrapper"] ;
         lua_pushboolean(L, [obj1 isEqualTo:obj2]) ;
@@ -706,7 +706,7 @@ static int userdata_eq(lua_State* L) {
 static int userdata_gc(lua_State* L) {
     HSStatusItemWrapper *obj = get_objectFromUserdata(__bridge_transfer HSStatusItemWrapper, L, 1, USERDATA_TAG) ;
     if (obj) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:L] ;
         obj.callbackRef = [skin luaUnref:refTable ref:obj.callbackRef] ;
         obj.selfRef     = [skin luaUnref:refTable ref:obj.selfRef] ;
         // some really rare but annoying cases arise when a change callback is queued but we're collected before
@@ -773,10 +773,10 @@ static luaL_Reg moduleLib[] = {
 //     {NULL,   NULL}
 // };
 
-int luaopen_hs__asm_guitk_menubar_statusitem(lua_State* __unused L) {
+int luaopen_hs__asm_guitk_menubar_statusitem(lua_State* L) {
     defineInternalDictionaryies() ;
 
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     refTable = [skin registerLibraryWithObject:USERDATA_TAG
                                      functions:moduleLib
                                  metaFunctions:nil    // or module_metaLib

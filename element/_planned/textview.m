@@ -30,7 +30,7 @@ static int refTable = LUA_NOREF;
 // }
 //
 // id to<moduleType>FromLua(lua_State *L, int idx) {
-//     LuaSkin *skin = [LuaSkin shared] ;
+//     LuaSkin *skin = [LuaSkin sharedWithState:L] ;
 //     <moduleType> *value ;
 //     if (luaL_testudata(L, idx, USERDATA_TAG)) {
 //         value = get_objectFromUserdata(__bridge <moduleType>, L, idx, USERDATA_TAG) ;
@@ -44,7 +44,7 @@ static int refTable = LUA_NOREF;
 #pragma mark - Hammerspoon/Lua Infrastructure
 
 // static int userdata_tostring(lua_State* L) {
-//     LuaSkin *skin = [LuaSkin shared] ;
+//     LuaSkin *skin = [LuaSkin sharedWithState:L] ;
 //     <moduleType> *obj = [skin luaObjectAtIndex:1 toClass:"<moduleType>"] ;
 //     NSString *title = ... ;
 //     [skin pushNSObject:[NSString stringWithFormat:@"%s: %@ (%p)", USERDATA_TAG, title, lua_topointer(L, 1)]] ;
@@ -55,7 +55,7 @@ static int refTable = LUA_NOREF;
 // // can't get here if at least one of us isn't a userdata type, and we only care if both types are ours,
 // // so use luaL_testudata before the macro causes a lua error
 //     if (luaL_testudata(L, 1, USERDATA_TAG) && luaL_testudata(L, 2, USERDATA_TAG)) {
-//         LuaSkin *skin = [LuaSkin shared] ;
+//         LuaSkin *skin = [LuaSkin sharedWithState:L] ;
 //         <moduleType> *obj1 = [skin luaObjectAtIndex:1 toClass:"<moduleType>"] ;
 //         <moduleType> *obj2 = [skin luaObjectAtIndex:2 toClass:"<moduleType>"] ;
 //         lua_pushboolean(L, [obj1 isEqualTo:obj2]) ;
@@ -98,8 +98,8 @@ static luaL_Reg moduleLib[] = {
 // };
 
 // NOTE: ** Make sure to change luaopen_..._internal **
-int luaopen_hs__asm_guitk_element_textview(lua_State* __unused L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+int luaopen_hs__asm_guitk_element_textview(lua_State* L) {
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
 // Use this if your module doesn't have a module specific object that it returns.
    refTable = [skin registerLibrary:moduleLib metaFunctions:nil] ; // or module_metaLib
 // Use this some of your functions return or act on a specific object unique to this module

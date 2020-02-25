@@ -80,7 +80,7 @@ static void defineInternalDictionaryies() {
 /// Returns:
 ///  * if an argument is provided, returns the elementObject userdata; otherwise returns the current value
 static int control_textAlignment(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TANY, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     NSControl *control = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!control || ![control isKindOfClass:[NSControl class]]) {
@@ -127,7 +127,7 @@ static int control_textAlignment(lua_State *L) {
 /// Notes:
 ///  * This method of providing differentiation between elements was more prominent in earlier versions of macOS and may have little or no effect on most visual elements in the current os.
 static int control_controlTint(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TANY, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     NSControl *control = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!control || ![control isKindOfClass:[NSControl class]]) {
@@ -173,7 +173,7 @@ static int control_controlTint(lua_State *L) {
 /// Notes:
 ///  * The exact effect this has on each element is type specific and may change the look of the element in other ways as well, such as reducing or removing borders for buttons -- the intent is provide a differing level of detail appropriate to the chosen element size; it is still incumbent upon you to select an appropriate sized font or frame size to take advantage of the level of detail provided.
 static int control_controlSize(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TANY, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     NSControl *control = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!control || ![control isKindOfClass:[NSControl class]]) {
@@ -217,7 +217,7 @@ static int control_controlSize(lua_State *L) {
 /// Notes:
 ///  * Not all elements have a highlighted appearance and this method will have no effect in such cases.
 static int control_highlighted(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TANY, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     NSControl *control = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!control || ![control isKindOfClass:[NSControl class]]) {
@@ -242,7 +242,7 @@ static int control_highlighted(lua_State *L) {
 /// Returns:
 ///  * if an argument is provided, returns the elementObject userdata; otherwise returns the current value
 static int control_enabled(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TANY, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     NSControl *control = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!control || ![control isKindOfClass:[NSControl class]]) {
@@ -270,7 +270,7 @@ static int control_enabled(lua_State *L) {
 /// Notes:
 ///  * a font table is defined as having two key-value pairs: `name` specifying the name of the font as a string and `size` specifying the font size as a number.
 static int control_font(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TANY, LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
     NSControl *control = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!control || ![control isKindOfClass:[NSControl class]]) {
@@ -302,7 +302,7 @@ static int control_font(lua_State *L) {
 /// Returns:
 ///  * if a value is provided, returns the elementObject ; otherwise returns the current value.
 static int control_lineBreakMode(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TANY, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     NSControl *control = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!control || ![control isKindOfClass:[NSControl class]]) {
@@ -346,7 +346,7 @@ static int control_lineBreakMode(lua_State *L) {
 /// Notes:
 ///  * The exact effect of this method depends upon the type of element; for example with the color well setting this to true will cause a callback as the user drags the mouse around in the color wheel; for a textfield this determines whether a callback occurs after each character is entered or deleted or just when the user enters or exits the textfield.
 static int control_continuous(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TANY, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     NSControl *control = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!control || ![control isKindOfClass:[NSControl class]]) {
@@ -375,7 +375,7 @@ static int control_continuous(lua_State *L) {
 /// Notes:
 ///  * When this is set to true, text layout and rendering is restricted to a single line. The element will interpret [hs._asm.guitk.element._control:lineBreakMode](#lineBreakMode) modes of "charWrap" and "wordWrap" as if they were "clip" and an editable textfield will ignore key binding commands that insert paragraph and line separators.
 static int control_usesSingleLineMode(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TANY, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     NSControl *control = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!control || ![control isKindOfClass:[NSControl class]]) {
@@ -410,7 +410,7 @@ static luaL_Reg moduleLib[] = {
 int luaopen_hs__asm_guitk_element__control(lua_State* L) {
     defineInternalDictionaryies() ;
 
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin registerLibrary:moduleLib metaFunctions:nil] ; // or module_metaLib
 
     [skin pushNSObject:@[

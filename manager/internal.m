@@ -98,7 +98,7 @@ static NSNumber *convertPercentageStringToNumber(NSString *stringValue) {
 
 - (void)passCallbackUpWith:(NSArray *)arguments {
     // allow next responder a chance since we don't have a callback set
-    id nextInChain = [self nextResponder] ;
+    NSObject *nextInChain = [self nextResponder] ;
     if (nextInChain) {
         SEL passthroughCallback = NSSelectorFromString(@"performPassthroughCallback:") ;
         if ([nextInChain respondsToSelector:passthroughCallback]) {
@@ -111,7 +111,7 @@ static NSNumber *convertPercentageStringToNumber(NSString *stringValue) {
 
 - (void)doFrameChangeCallbackWith:(NSView *)targetView {
     if (_frameChangeCallback != LUA_NOREF) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
         [skin pushLuaRef:refTable ref:_frameChangeCallback] ;
         [skin pushNSObject:self] ;
         [skin pushNSObject:targetView] ;
@@ -255,7 +255,10 @@ static NSNumber *convertPercentageStringToNumber(NSString *stringValue) {
 
 - (void)drawRect:(NSRect)dirtyRect {
     if (_frameDebugColor) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         NSDisableScreenUpdates() ;
+#pragma clang diagnostic pop
         NSGraphicsContext* gc = [NSGraphicsContext currentContext];
         [gc saveGraphicsState];
 
@@ -284,7 +287,10 @@ static NSNumber *convertPercentageStringToNumber(NSString *stringValue) {
             }
         }] ;
         [gc restoreGraphicsState];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         NSEnableScreenUpdates() ;
+#pragma clang diagnostic pop
     }
     [super drawRect:dirtyRect] ;
 }
@@ -292,7 +298,7 @@ static NSNumber *convertPercentageStringToNumber(NSString *stringValue) {
 // perform callback for subviews which don't have a callback defined; see button.m for how to allow this chaining
 - (void)performPassthroughCallback:(NSArray *)arguments {
     if (_passthroughCallback != LUA_NOREF) {
-        LuaSkin *skin    = [LuaSkin shared] ;
+        LuaSkin *skin    = [LuaSkin sharedWithState:NULL] ;
         int     argCount = 1 ;
 
         [skin pushLuaRef:refTable ref:_passthroughCallback] ;
@@ -312,7 +318,7 @@ static NSNumber *convertPercentageStringToNumber(NSString *stringValue) {
 }
 
 - (void)didAddSubview:(NSView *)subview {
-    LuaSkin   *skin = [LuaSkin shared] ;
+    LuaSkin   *skin = [LuaSkin sharedWithState:NULL] ;
 //     [skin logInfo:[NSString stringWithFormat:@"%s:didAddSubview - added %@", USERDATA_TAG, subview]] ;
     // increase lua reference count of subview so it won't be collected
     if (![skin luaRetain:refTable forNSObject:subview]) {
@@ -321,7 +327,7 @@ static NSNumber *convertPercentageStringToNumber(NSString *stringValue) {
 }
 
 - (void)willRemoveSubview:(NSView *)subview {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
 //     [skin logInfo:[NSString stringWithFormat:@"%s:willRemoveSubview - removed %@", USERDATA_TAG, subview]] ;
     [skin luaRelease:refTable forNSObject:subview] ;
 }
@@ -332,7 +338,7 @@ static NSNumber *convertPercentageStringToNumber(NSString *stringValue) {
         NSValue *location = [NSValue valueWithPoint:point] ;
 
         if (_mouseCallback != LUA_NOREF) {
-            LuaSkin *skin = [LuaSkin shared] ;
+            LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
             [skin pushLuaRef:refTable ref:_mouseCallback] ;
             [skin pushNSObject:self] ;
             [skin pushNSObject:message] ;
@@ -365,7 +371,7 @@ static NSNumber *convertPercentageStringToNumber(NSString *stringValue) {
 - (BOOL)draggingCallback:(NSString *)message with:(id<NSDraggingInfo>)sender {
     BOOL isAllGood = NO ;
     if (_draggingCallbackRef != LUA_NOREF) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
         lua_State *L = skin.L ;
         int argCount = 2 ;
         [skin pushLuaRef:refTable ref:_draggingCallbackRef] ;
@@ -444,7 +450,7 @@ static NSNumber *convertPercentageStringToNumber(NSString *stringValue) {
 @end
 
 static void validateElementDetailsTable(lua_State *L, int idx, NSMutableDictionary *details) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     idx = lua_absindex(L, idx) ;
     if (lua_type(L, idx) == LUA_TTABLE) {
         if (lua_getfield(L, idx, "id") == LUA_TSTRING) {
@@ -543,7 +549,7 @@ static void validateElementDetailsTable(lua_State *L, int idx, NSMutableDictiona
 }
 
 static void adjustElementDetailsTable(lua_State *L, HSASMGUITKManager *manager, NSView *element, NSDictionary *changes) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     NSMutableDictionary *details = [manager.subviewDetails objectForKey:element] ;
     if (!details) details = [[NSMutableDictionary alloc] init] ;
     [skin pushNSObject:changes] ;
@@ -567,7 +573,7 @@ static void adjustElementDetailsTable(lua_State *L, HSASMGUITKManager *manager, 
 /// Notes:
 ///  * In most cases, setting the frame is not necessary and will be overridden when the manager is assigned to a `hs._asm.guitk` window or another manager. It may be useful, however, when assigning elements to an unattached manager so that proper positioning can be worked out before final assignment of the new manager to it's parent object.
 static int manager_new(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
     NSRect frameRect = (lua_gettop(L) == 1) ? [skin tableToRectAtIndex:1] : NSZeroRect ;
     HSASMGUITKManager *manager = [[HSASMGUITKManager alloc] initWithFrame:frameRect] ;
@@ -598,7 +604,7 @@ static int manager_new(lua_State *L) {
 ///
 ///  * Element frames which contain a height or width which is less than .5 points (effectively invisible) will draw an X at the center of the elements position instead of a rectangle.
 static int manager__debugFrames(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TNIL | LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 1) {
@@ -639,7 +645,7 @@ static int manager__debugFrames(lua_State *L) {
 ///
 /// * See also [hs._asm.guitk.manager:elementAutoPosition](#elementAutoPosition).
 static int manager_autoPosition(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
     [manager frameChangedNotification:[NSNotification notificationWithName:NSViewFrameDidChangeNotification object:manager]] ;
@@ -663,7 +669,7 @@ static int manager_autoPosition(lua_State *L) {
 ///  * See also [hs._asm.guitk.manager:autoPosition](#autoPosition).
 ///  * This method is wrapped so that elements which are assigned to a manager can access this method as `hs._asm.guitk.element:autoPosition()`
 static int manager_elementAutoPosition(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
     NSView *item = (lua_type(L, 2) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:2] : nil ;
@@ -693,7 +699,7 @@ static int manager_elementAutoPosition(lua_State *L) {
 /// Notes:
 ///  * If the frameDetails table is not provided, the elements position will default to the lower left corner of the last element added to the manager, and its size will default to the elements fitting size as returned by [hs._asm.guitk.manager:elementFittingSize](#elementFittingSize).
 static int manager_insertElement(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY, LS_TTABLE | LS_TOPTIONAL, LS_TNUMBER | LS_TINTEGER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
     NSView *item = (lua_type(L, 2) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:2] : nil ;
@@ -749,7 +755,7 @@ static int manager_insertElement(lua_State *L) {
 /// Notes:
 ///  * See also [hs._asm.guitk.manager:elementRemoveFromManager](#elementRemoveFromManager)
 static int manager_removeElement(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TINTEGER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
     NSInteger idx = ((lua_type(L, 2) == LUA_TNUMBER) ? lua_tointeger(L, 2) : (NSInteger)manager.subviews.count) - 1 ;
@@ -788,7 +794,7 @@ static int manager_removeElement(lua_State *L) {
 ///  * this method will not adjust the postion of any other element which may already be at the new position for element1
 ///  * an extension to `hs._asm.guitk.manager` which may support these limitations is under consideration but is currently not in the works.
 static int manager_moveElementAbove(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY, LS_TANY, LS_TNUMBER | LS_TSTRING | LS_TOPTIONAL, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
     NSView *element1 = (lua_type(L, 2) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:2] : nil ;
@@ -851,7 +857,7 @@ static int manager_moveElementAbove(lua_State *L) {
 ///  * this method will not adjust the postion of any other element which may already be at the new position for element1
 ///  * an extension to `hs._asm.guitk.manager` which may support these limitations is under consideration but is currently not in the works.
 static int manager_moveElementBelow(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY, LS_TANY, LS_TNUMBER | LS_TSTRING | LS_TOPTIONAL, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
     NSView *element1 = (lua_type(L, 2) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:2] : nil ;
@@ -914,7 +920,7 @@ static int manager_moveElementBelow(lua_State *L) {
 ///  * this method will not adjust the postion of any other element which may already be at the new position for element1
 ///  * an extension to `hs._asm.guitk.manager` which may support these limitations is under consideration but is currently not in the works.
 static int manager_moveElementLeftOf(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY, LS_TANY, LS_TNUMBER | LS_TSTRING | LS_TOPTIONAL, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
     NSView *element1 = (lua_type(L, 2) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:2] : nil ;
@@ -977,7 +983,7 @@ static int manager_moveElementLeftOf(lua_State *L) {
 ///  * this method will not adjust the postion of any other element which may already be at the new position for element1
 ///  * an extension to `hs._asm.guitk.manager` which may support these limitations is under consideration but is currently not in the works.
 static int manager_moveElementRightOf(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY, LS_TANY, LS_TNUMBER | LS_TSTRING | LS_TOPTIONAL, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
     NSView *element1 = (lua_type(L, 2) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:2] : nil ;
@@ -1032,7 +1038,7 @@ static int manager_moveElementRightOf(lua_State *L) {
 ///  * If you do not specify an elements height or width with [hs._asm.guitk.manager:elementFrameDetails](#elementFrameDetails), the value returned by this method will be used instead; in cases where a specific dimension is not defined by this method, you should make sure to specify it or the element may not be visible.
 static int manager_elementFittingSize(lua_State *L) {
 // This is a method so it can be inherited by elements, but it doesn't really have to be
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY, LS_TBREAK] ;
 //     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
     NSView *item = (lua_type(L, 2) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:2] : nil ;
@@ -1061,7 +1067,7 @@ static int manager_elementFittingSize(lua_State *L) {
 ///  * If the manager is the member of another manager, this manager's size (but not top-left corner) is adjusted within its parent.
 ///  * If the manager is assigned to a `hs._asm.guitk` window, the window's size (but not top-left corner) will be adjusted to the calculated size.
 static int manager_sizeToFit(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
 
@@ -1121,7 +1127,7 @@ static int manager_sizeToFit(lua_State *L) {
 /// Returns:
 ///  * a table containing the elements in index order currently managed by this manager
 static int manager_elements(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
     LS_NSConversionOptions options = (lua_gettop(L) == 1) ? LS_TNONE : (lua_toboolean(L, 2) ? LS_NSDescribeUnknownTypes : LS_TNONE) ;
@@ -1149,7 +1155,7 @@ static int manager_elements(lua_State *L) {
 ///
 ///  * Note that elements which have a callback that returns a response cannot use this common pass through callback method; in such cases a specific callback must be assigned to the element directly as described in the element's documentation.
 static int manager_passthroughCallback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TFUNCTION | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
 
@@ -1188,7 +1194,7 @@ static int manager_passthroughCallback(lua_State *L) {
 ///
 ///  * Frame change callbacks are not passed to the parent passthrough callback; they must be handled by the manager in which the change occurs.
 static int manager_frameChangeCallback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TFUNCTION | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
 
@@ -1238,7 +1244,7 @@ static int manager_frameChangeCallback(lua_State *L) {
 ///  * A manager object can only accept drag-and-drop items when the `hs._asm.guitk` window the manager ultimately belongs to is at a level of `hs._asm.guitk.levels.dragging` or lower. Note that the manager receiving the drag-and-drop item does not have to be the content manager of the `hs._asm.guitk` window -- it can be an element of another manager acting as the window content manager.
 ///  * a manager object can only accept drag-and-drop items if it's `hs._asm.guitk` window object accepts mouse events, i.e. `hs._asm.guitk:ignoresMouseEvents` is set to false.
 static int manager_draggingCallback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TFUNCTION | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
 
@@ -1282,7 +1288,7 @@ static int manager_draggingCallback(lua_State *L) {
 ///
 ///  * By default, only mouse enter and mouse exit events will invoke the callback to reduce overhead; if you need to track mouse movement within the manager as well, see [hs._asm.guitk.manager:trackMouseMove](#trackMouseMove).
 static int manager_mouseCallback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TFUNCTION | LS_TBOOLEAN | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
 
@@ -1320,7 +1326,7 @@ static int manager_mouseCallback(lua_State *L) {
 /// Notes:
 ///  * [hs._asm.guitk.manager:mouseCallback](#mouseCallback) must bet set to a callback function or true for this attribute to have any effect.
 static int manager_trackMouseMove(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
 
@@ -1349,7 +1355,7 @@ static int manager_trackMouseMove(lua_State *L) {
 ///  * The metamethods for this module are designed so that you usually shouldn't need to access this method directly very often.
 ///  * The name "nextResponder" comes from the macOS user interface internal organization and refers to the object which is further up the responder chain when determining the target for user activity.
 static int manager__nextResponder(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
     if (manager.nextResponder) {
@@ -1373,7 +1379,7 @@ static int manager__nextResponder(lua_State *L) {
 /// Notes:
 ///  * Tooltips are displayed when the window is active and the mouse pointer hovers over the content manager and no other element at the current mouse position has a defined tooltip.
 static int manager_toolTip(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
 
@@ -1403,7 +1409,7 @@ static int manager_toolTip(lua_State *L) {
 /// Notes:
 ///  * See [hs._asm.guitk.manager:elementFrameDetails](#elementFrameDetails) for more information on setting an element's identifier string.
 static int manager_element(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TNUMBER | LS_TINTEGER, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
     if (lua_type(L, 2) == LUA_TSTRING) {
@@ -1411,7 +1417,8 @@ static int manager_element(lua_State *L) {
         BOOL found = NO ;
         for (NSView *view in manager.subviewDetails) {
             NSMutableDictionary *details = [manager.subviewDetails objectForKey:view] ;
-            if ([details[@"id"] isEqualToString:identifier]) {
+            NSString *elementID = details[@"id"] ;
+            if ([elementID isEqualToString:identifier]) {
                 [skin pushNSObject:view] ;
                 found = YES ;
                 break ;
@@ -1459,7 +1466,7 @@ static int manager_element(lua_State *L) {
 ///
 ///  * This method is wrapped so that elements which are assigned to a manager can access this method as `hs._asm.guitk.element:frameDetails([details])`
 static int manager_elementFrameDetails(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY, LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKManager *manager = [skin toNSObjectAtIndex:1] ;
     NSView *item = (lua_type(L, 2) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:2] : nil ;
@@ -1498,7 +1505,7 @@ static int pushHSASMGUITKManager(lua_State *L, id obj) {
 }
 
 id toHSASMGUITKManagerFromLua(lua_State *L, int idx) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKManager *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {
         value = get_objectFromUserdata(__bridge HSASMGUITKManager, L, idx, USERDATA_TAG) ;
@@ -1522,7 +1529,7 @@ static int pushHSCanvasWindow(lua_State *L, __unused id obj) {
 #pragma mark - Hammerspoon/Lua Infrastructure
 
 static int userdata_tostring(lua_State* L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKManager *obj = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKManager"] ;
     NSString *title = NSStringFromRect(obj.frame) ;
     [skin pushNSObject:[NSString stringWithFormat:@"%s: %@ (%p)", USERDATA_TAG, title, lua_topointer(L, 1)]] ;
@@ -1533,7 +1540,7 @@ static int userdata_eq(lua_State* L) {
 // can't get here if at least one of us isn't a userdata type, and we only care if both types are ours,
 // so use luaL_testudata before the macro causes a lua error
     if (luaL_testudata(L, 1, USERDATA_TAG) && luaL_testudata(L, 2, USERDATA_TAG)) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:L] ;
         HSASMGUITKManager *obj1 = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKManager"] ;
         HSASMGUITKManager *obj2 = [skin luaObjectAtIndex:2 toClass:"HSASMGUITKManager"] ;
         lua_pushboolean(L, [obj1 isEqualTo:obj2]) ;
@@ -1548,7 +1555,7 @@ static int userdata_gc(lua_State* L) {
     if (obj) {
         obj.selfRefCount-- ;
         if (obj.selfRefCount == 0) {
-            LuaSkin *skin = [LuaSkin shared] ;
+            LuaSkin *skin = [LuaSkin sharedWithState:L] ;
             obj.mouseCallback       = [skin luaUnref:refTable ref:obj.mouseCallback] ;
             obj.passthroughCallback = [skin luaUnref:refTable ref:obj.passthroughCallback] ;
             obj.frameChangeCallback = [skin luaUnref:refTable ref:obj.frameChangeCallback] ;
@@ -1618,7 +1625,7 @@ static luaL_Reg moduleLib[] = {
 // };
 
 int luaopen_hs__asm_guitk_manager_internal(lua_State* L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     refTable = [skin registerLibraryWithObject:USERDATA_TAG
                                      functions:moduleLib
                                  metaFunctions:nil    // or module_metaLib

@@ -63,7 +63,7 @@ static void defineInternalDictionaryies() {
 
 - (void)callbackHamster:(NSArray *)messageParts { // does the "heavy lifting"
     if (_callbackRef != LUA_NOREF) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
         [skin pushLuaRef:refTable ref:_callbackRef] ;
         for (id part in messageParts) [skin pushNSObject:part] ;
         if (![skin protectedCallAndTraceback:(int)messageParts.count nresults:0]) {
@@ -73,7 +73,7 @@ static void defineInternalDictionaryies() {
         }
     } else {
         // allow next responder a chance since we don't have a callback set
-        id nextInChain = [self nextResponder] ;
+        NSObject *nextInChain = [self nextResponder] ;
         if (nextInChain) {
             SEL passthroughCallback = NSSelectorFromString(@"performPassthroughCallback:") ;
             if ([nextInChain respondsToSelector:passthroughCallback]) {
@@ -101,13 +101,13 @@ static void defineInternalDictionaryies() {
     if (_editingCallbackRef != LUA_NOREF) {
         NSArray *arguments = @[] ;
         if (message) {
-            if ([message isKindOfClass:[NSArray class]]) {
+            if ([(NSObject *)message isKindOfClass:[NSArray class]]) {
                 arguments = message ;
             } else {
                 arguments = @[ message ] ;
             }
         }
-        LuaSkin   *skin = [LuaSkin shared] ;
+        LuaSkin   *skin = [LuaSkin sharedWithState:NULL] ;
         lua_State *L    = skin.L ;
         [skin pushLuaRef:refTable ref:_editingCallbackRef] ;
         [skin pushNSObject:self] ;
@@ -203,7 +203,7 @@ static void defineInternalDictionaryies() {
 ///
 ///  * The textfield element does not have a default width unless you assign a value to it with [hs._asm.guitk.element.textfield:value](#value); if you are assigning an empty textfield element to an `hs._asm.guitk.manager`, be sure to specify a width in the frame details or the element may not be visible.
 static int textfield_new(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
 
     NSRect frameRect = (lua_gettop(L) == 1) ? [skin tableToRectAtIndex:1] : NSZeroRect ;
@@ -232,7 +232,7 @@ static int textfield_new(lua_State *L) {
 ///    * If you specify `text` as a string, the label is non-wrapping and appears in the default system font.
 ///    * If you specify `text` as an `hs.styledtext` object, the line break mode and font are determined by the style attributes of the object.
 static int textfield_newLabel(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TANY, LS_TBREAK] ;
 
     HSASMGUITKElementTextField *textfield ;
@@ -310,7 +310,7 @@ static int textfield_newLabel(lua_State *L) {
 /// Notes:
 ///  * This constructor creates a non-wrapping, editable text field, suitable for accepting user input.
 static int textfield_newTextField(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
 
     HSASMGUITKElementTextField *textfield ;
@@ -357,7 +357,7 @@ static int textfield_newTextField(lua_State *L) {
 /// Notes:
 ///  * This constructor creates a wrapping, selectable, non-editable text field, that is suitable for use as a label or informative text. The text defaults to the system font.
 static int textfield_newWrappingLabel(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TSTRING, LS_TBREAK] ;
 
     HSASMGUITKElementTextField *textfield ;
@@ -423,7 +423,7 @@ static int textfield_newWrappingLabel(lua_State *L) {
 ///      * the string "textDidChange" indicating that the user has typed or deleted something in the textfield
 ///      * the current string value of the textfield -- see [hs._asm.guitk.element.textfield:value](#value)
 static int textfield_callback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TFUNCTION | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -472,7 +472,7 @@ static int textfield_callback(lua_State *L) {
 ///    * Note that the return value is currently ignored when the key pressed is "escape".
 ///    * Note that the specification allows for the additional keys "left", "right", "up", and "down" to trigger this callback, but at present it is not known how to enable this for a textfield element. It is surmised that they may be applicable to text based elements that are not currently supported by `hs._asm.guitk`. If you do manage to receive a callback for one of these keys, please submit an issue with sample code so we can determine how to properly document them.
 static int textfield_editingCallback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TFUNCTION | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -506,7 +506,7 @@ static int textfield_editingCallback(lua_State *L) {
 /// Notes:
 ///  * This method has no effect if the textfield is not editable or selectable.  Use `hs._asm.guitk:activeElement` if you wish to remove the focus from any textfield that is currently selected.
 static int textfield_selectText(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -528,7 +528,7 @@ static int textfield_selectText(lua_State *L) {
 /// Notes:
 ///  * If the style of a textfield element can be edited, the user will be able to access the font and color panels by right-clicking in the text field and selecting the Font submenu from the menu that is shown.
 static int textfield_allowsEditingTextAttributes(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -551,7 +551,7 @@ static int textfield_allowsEditingTextAttributes(lua_State *L) {
 /// Returns:
 ///  * if a value is provided, returns the textfieldObject ; otherwise returns the current value.
 static int textfield_drawsBackground(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -577,7 +577,7 @@ static int textfield_drawsBackground(lua_State *L) {
 /// Notes:
 ///  * [hs._asm.guitk.element.textfield:styleEditable](#styleEditable) must also be true for this method to have any effect.
 static int textfield_importsGraphics(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -600,7 +600,7 @@ static int textfield_importsGraphics(lua_State *L) {
 /// Returns:
 ///  * if a value is provided, returns the textfieldObject ; otherwise returns the current value.
 static int textfield_preferredMaxLayoutWidth(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -625,7 +625,8 @@ static int textfield_preferredMaxLayoutWidth(lua_State *L) {
 ///
 /// Notes:
 ///  * only has an effect if [hs._asm.guitk.element.textfield:bezeled](#bezeled) is true.
-static int textfield_bezelStyle(lua_State *L) {    LuaSkin *skin = [LuaSkin shared] ;
+static int textfield_bezelStyle(lua_State *L) {
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -665,7 +666,7 @@ static int textfield_bezelStyle(lua_State *L) {    LuaSkin *skin = [LuaSkin shar
 /// Notes:
 ///  * The background color will only be drawn when [hs._asm.guitk.element.textfield:drawsBackground](#drawsBackground) is true.
 static int textfield_backgroundColor(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -691,7 +692,7 @@ static int textfield_backgroundColor(lua_State *L) {
 /// Notes:
 ///  * Has no effect on portions of an `hs.styledtext` value that specifies the text color for the object
 static int textfield_textColor(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -715,7 +716,7 @@ static int textfield_textColor(lua_State *L) {
 /// Returns:
 ///  * If an argument is provided, the textfieldObject; otherwise the current value.
 static int textfield_placeholderString(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -751,7 +752,7 @@ static int textfield_placeholderString(lua_State *L) {
 /// Notes:
 ///  * If you set this to true, [hs._asm.guitk.element.textfield:bordered](#bordered) is set to false.
 static int textfield_bezeled(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -777,7 +778,7 @@ static int textfield_bezeled(lua_State *L) {
 /// Notes:
 ///  * If you set this to true, [hs._asm.guitk.element.textfield:bezeled](#bezeled) is set to false.
 static int textfield_bordered(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -803,7 +804,7 @@ static int textfield_bordered(lua_State *L) {
 /// Notes:
 ///  * If a tooltip is set with `hs._asm.guitk.element._control:tooltip` then this method has no effect.
 static int textfield_allowsExpansionToolTips(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -829,7 +830,7 @@ static int textfield_allowsExpansionToolTips(lua_State *L) {
 /// Notes:
 ///  * Setting this to true automatically sets [hs._asm.guitk.element.textfield:selectable](#selectable) to true.
 static int textfield_editable(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -855,7 +856,7 @@ static int textfield_editable(lua_State *L) {
 /// Notes:
 ///  * Setting this to false automatically sets [hs._asm.guitk.element.textfield:editable](#editable) to false.
 static int textfield_selectable(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -884,7 +885,7 @@ static int textfield_selectable(lua_State *L) {
 /// Notes:
 ///  * If no argument is provided and [hs._asm.guitk.element.textfield:styleEditable](#styleEditable) is true, if the style has been modified by the user an `hs.styledtext` object will be returned even if the most recent assignment was with a string value.
 static int textfield_stringValue(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -927,7 +928,7 @@ static int textfield_stringValue(lua_State *L) {
 /// Notes:
 ///  * This method is only available in macOS 10.12.1 and newer
 static int textfield_allowsCharacterPickerTouchBarItem(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -967,7 +968,7 @@ static int textfield_allowsCharacterPickerTouchBarItem(lua_State *L) {
 /// Notes:
 ///  * This method is only available in macOS 10.11 and newer
 static int textfield_allowsDefaultTighteningForTruncation(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -1009,7 +1010,7 @@ static int textfield_allowsDefaultTighteningForTruncation(lua_State *L) {
 ///  * If the text reaches the number of lines allowed, or the height of the container cannot accommodate the number of lines needed, the text will be clipped or truncated.
 ///    * Affects the default fitting size when the textfield is assigned to an `hs._asm.guitk.manager` object if the textfield element's height and width are not specified when assigned.
 static int textfield_maximumNumberOfLines(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TINTEGER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -1049,7 +1050,7 @@ static int textfield_maximumNumberOfLines(lua_State *L) {
 /// Notes:
 ///  * This method is only available in macOS 10.12.2 and newer
 static int textfield_automaticTextCompletionEnabled(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementTextField *textfield = [skin toNSObjectAtIndex:1] ;
 
@@ -1093,7 +1094,7 @@ static int pushHSASMGUITKElementTextField(lua_State *L, id obj) {
 }
 
 id toHSASMGUITKElementTextFieldFromLua(lua_State *L, int idx) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementTextField *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {
         value = get_objectFromUserdata(__bridge HSASMGUITKElementTextField, L, idx, USERDATA_TAG) ;
@@ -1107,7 +1108,7 @@ id toHSASMGUITKElementTextFieldFromLua(lua_State *L, int idx) {
 #pragma mark - Hammerspoon/Lua Infrastructure
 
 static int userdata_tostring(lua_State* L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementTextField *obj = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKElementTextField"] ;
     NSString *title = NSStringFromRect(obj.frame) ;
     [skin pushNSObject:[NSString stringWithFormat:@"%s: %@ (%p)", USERDATA_TAG, title, lua_topointer(L, 1)]] ;
@@ -1118,7 +1119,7 @@ static int userdata_eq(lua_State* L) {
 // can't get here if at least one of us isn't a userdata type, and we only care if both types are ours,
 // so use luaL_testudata before the macro causes a lua error
     if (luaL_testudata(L, 1, USERDATA_TAG) && luaL_testudata(L, 2, USERDATA_TAG)) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:L] ;
         HSASMGUITKElementTextField *obj1 = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKElementTextField"] ;
         HSASMGUITKElementTextField *obj2 = [skin luaObjectAtIndex:2 toClass:"HSASMGUITKElementTextField"] ;
         lua_pushboolean(L, [obj1 isEqualTo:obj2]) ;
@@ -1133,7 +1134,7 @@ static int userdata_gc(lua_State* L) {
     if (obj) {
         obj.selfRefCount-- ;
         if (obj.selfRefCount == 0) {
-            LuaSkin *skin = [LuaSkin shared] ;
+            LuaSkin *skin = [LuaSkin sharedWithState:L] ;
             obj.callbackRef        = [skin luaUnref:refTable ref:obj.callbackRef] ;
             obj.editingCallbackRef = [skin luaUnref:refTable ref:obj.editingCallbackRef] ;
 
@@ -1200,7 +1201,7 @@ static luaL_Reg moduleLib[] = {
 int luaopen_hs__asm_guitk_element_textfield(lua_State* L) {
     defineInternalDictionaryies() ;
 
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     refTable = [skin registerLibraryWithObject:USERDATA_TAG
                                      functions:moduleLib
                                  metaFunctions:nil    // or module_metaLib

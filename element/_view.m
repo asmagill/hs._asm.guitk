@@ -45,7 +45,7 @@ static void defineInternalDictionaryies() {
 ///  * Not all elements provide one or both of these fields; in such a case, the value for the missing or unspecified field will be 0.
 ///  * If you do not specify an elements height or width with `hs._asm.guitk.manager:elementFrameDetails`, with the elements constructor, or with [hs._asm.guitk.element._view:frameSize](#frameSize), the value returned by this method will be used instead; in cases where a specific dimension is not defined by this method, you should make sure to specify it or the element may not be visible.
 static int view_fittingSize(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TANY, LS_TBREAK] ;
     NSView *view = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!view || ![view isKindOfClass:[NSView class]]) {
@@ -71,7 +71,7 @@ static int view_fittingSize(lua_State *L) {
 ///
 ///  * in general, it is more useful to adjust the element's size with `hs._asm.guitk.manager:elementFrameDetails` because this supports percentages and auto-resizing based on the size of the element's parent.  This method may be useful, however, when pre-building content before it has been added to a manager and the size cannot be assigned with its constructor.
 static int view_frameSize(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TANY, LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
     NSView *view = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!view || ![view isKindOfClass:[NSView class]]) {
@@ -109,7 +109,7 @@ static int view_frameSize(lua_State *L) {
 ///  * The metamethods for `hs._asm.guitk.element` are designed so that you usually shouldn't need to access this method directly very often.
 ///  * The name "nextResponder" comes from the macOS user interface internal organization and refers to the object which is further up the responder chain when determining the target for user activity.
 static int view__nextResponder(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TANY, LS_TBREAK] ;
     NSView *view = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!view || ![view isKindOfClass:[NSView class]]) {
@@ -136,7 +136,7 @@ static int view__nextResponder(lua_State *L) {
 /// Notes:
 ///  * Tooltips are displayed when the window is active and the mouse pointer hovers over an element.
 static int view_toolTip(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TANY, LS_TSTRING | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     NSView *view = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!view || ![view isKindOfClass:[NSView class]]) {
@@ -172,7 +172,7 @@ static int view_toolTip(lua_State *L) {
 // If you're digging this deep to learn why the note above, a quick intial search suggests that this method is old and manipulating the layer directly is the more "modern" way to do it, but this would require some significant changes and will be delayed until absolutely necessary
 
 static int view_frameCenterRotation(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TANY, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     NSView *view = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!view || ![view isKindOfClass:[NSView class]]) {
@@ -203,7 +203,7 @@ static int view_frameCenterRotation(lua_State *L) {
 ///
 ///  * When used as a property through the `hs._asm.guitk.manager` metamethods, this property can only get or set whether or not the element itself is explicitly hidden.
 static int view_hidden(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TANY, LS_TBOOLEAN | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     NSView *view = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!view || ![view isKindOfClass:[NSView class]]) {
@@ -231,7 +231,7 @@ static int view_hidden(lua_State *L) {
 /// Returns:
 ///  * if an argument is provided, returns the elementObject userdata; otherwise returns the current value
 static int view_alphaValue(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TANY, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     NSView *view = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!view || ![view isKindOfClass:[NSView class]]) {
@@ -265,7 +265,7 @@ static int view_alphaValue(lua_State *L) {
 ///  * Setting this for an element that cannot be an active element has no effect.
 ///  * When an element is rotated with [hs._asm.guitk.element._view:rotation](#rotation), the focus ring may not appear properly; if you are using angles other then the four cardinal directions (0, 90, 180, or 270), it may be visually more appropriate to set this to "none".
 static int view_focusRingType(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TANY, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     NSView *view = (lua_type(L, 1) == LUA_TUSERDATA) ? [skin toNSObjectAtIndex:1] : nil ;
     if (!view || ![view isKindOfClass:[NSView class]]) {
@@ -313,7 +313,7 @@ static luaL_Reg moduleLib[] = {
 int luaopen_hs__asm_guitk_element__view(lua_State* L) {
     defineInternalDictionaryies() ;
 
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin registerLibrary:moduleLib metaFunctions:nil] ; // or module_metaLib
 
     [skin pushNSObject:@[

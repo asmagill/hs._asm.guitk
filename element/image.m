@@ -76,7 +76,7 @@ static void defineInternalDictionaryies() {
 
 - (void)performCallback:(__unused id)sender {
     if (_callbackRef != LUA_NOREF) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
         [skin pushLuaRef:refTable ref:_callbackRef] ;
         [skin pushNSObject:self] ;
         if (![skin protectedCallAndTraceback:1 nresults:0]) {
@@ -86,7 +86,7 @@ static void defineInternalDictionaryies() {
         }
     } else {
         // allow next responder a chance since we don't have a callback set
-        id nextInChain = [self nextResponder] ;
+        NSObject *nextInChain = [self nextResponder] ;
         if (nextInChain) {
             SEL passthroughCallback = NSSelectorFromString(@"performPassthroughCallback:") ;
             if ([nextInChain respondsToSelector:passthroughCallback]) {
@@ -117,7 +117,7 @@ static void defineInternalDictionaryies() {
 ///
 ///  * If you do not assign an image to the element with [hs._asm.guitk.element.image:image](#image) after creating a new image element, the element will not have a default height or width; when assigning the element to an `hs._asm.guitk.manager`, be sure to specify them in the frame details or the element may not be visible.
 static int image_new(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
 
     NSRect frameRect = (lua_gettop(L) == 1) ? [skin tableToRectAtIndex:1] : NSZeroRect ;
@@ -144,7 +144,7 @@ static int image_new(lua_State *L) {
 /// Returns:
 ///  * if a value is provided, returns the imageObject ; otherwise returns the current value.
 static int image_allowsCutCopyPaste(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementImage *image = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 1) {
@@ -166,7 +166,7 @@ static int image_allowsCutCopyPaste(lua_State *L) {
 /// Returns:
 ///  * if a value is provided, returns the imageObject ; otherwise returns the current value.
 static int image_animates(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementImage *image = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 1) {
@@ -188,7 +188,7 @@ static int image_animates(lua_State *L) {
 /// Returns:
 ///  * if a value is provided, returns the imageObject ; otherwise returns the current value.
 static int image_editable(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementImage *image = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 1) {
@@ -219,7 +219,7 @@ static int image_editable(lua_State *L) {
 /// Returns:
 ///  * if a value is provided, returns the imageObject ; otherwise returns the current value.
 static int image_imageAlignment(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementImage *image = [skin toNSObjectAtIndex:1] ;
 
@@ -264,7 +264,7 @@ static int image_imageAlignment(lua_State *L) {
 /// Notes:
 ///  * Apple considers the photo, groove, and button style frames "stylistically obsolete" and if a frame is required, recommend that you use the bezel style or draw your own to more closely match the OS look and feel.
 static int image_imageFrameStyle(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementImage *image = [skin toNSObjectAtIndex:1] ;
 
@@ -305,7 +305,7 @@ static int image_imageFrameStyle(lua_State *L) {
 /// Returns:
 ///  * if a value is provided, returns the imageObject ; otherwise returns the current value.
 static int image_imageScaling(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementImage *image = [skin toNSObjectAtIndex:1] ;
 
@@ -345,7 +345,7 @@ static int image_imageScaling(lua_State *L) {
 /// Notes:
 ///  * If the element is editable or supports cut-and-paste, any change made by the user to the image will be available to Hammerspoon through this method.
 static int image_image(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementImage *image = [skin toNSObjectAtIndex:1] ;
 
@@ -377,7 +377,7 @@ static int image_image(lua_State *L) {
 ///  * The image callback will receive one argument and should return none. The argument will be the imageObject userdata.
 ///    * Use [hs._asm.guitk.element.image:image](#image) on the argument to get the new image.
 static int image_callback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TFUNCTION | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementImage *image = [skin toNSObjectAtIndex:1] ;
 
@@ -415,7 +415,7 @@ static int pushHSASMGUITKElementImage(lua_State *L, id obj) {
 }
 
 id toHSASMGUITKElementImageFromLua(lua_State *L, int idx) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementImage *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {
         value = get_objectFromUserdata(__bridge HSASMGUITKElementImage, L, idx, USERDATA_TAG) ;
@@ -429,7 +429,7 @@ id toHSASMGUITKElementImageFromLua(lua_State *L, int idx) {
 #pragma mark - Hammerspoon/Lua Infrastructure
 
 static int userdata_tostring(lua_State* L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementImage *obj = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKElementImage"] ;
     NSString *title = NSStringFromRect(obj.frame) ;
     [skin pushNSObject:[NSString stringWithFormat:@"%s: %@ (%p)", USERDATA_TAG, title, lua_topointer(L, 1)]] ;
@@ -440,7 +440,7 @@ static int userdata_eq(lua_State* L) {
 // can't get here if at least one of us isn't a userdata type, and we only care if both types are ours,
 // so use luaL_testudata before the macro causes a lua error
     if (luaL_testudata(L, 1, USERDATA_TAG) && luaL_testudata(L, 2, USERDATA_TAG)) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:L] ;
         HSASMGUITKElementImage *obj1 = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKElementImage"] ;
         HSASMGUITKElementImage *obj2 = [skin luaObjectAtIndex:2 toClass:"HSASMGUITKElementImage"] ;
         lua_pushboolean(L, [obj1 isEqualTo:obj2]) ;
@@ -455,7 +455,7 @@ static int userdata_gc(lua_State* L) {
     if (obj) {
         obj.selfRefCount-- ;
         if (obj.selfRefCount == 0) {
-            LuaSkin *skin = [LuaSkin shared] ;
+            LuaSkin *skin = [LuaSkin sharedWithState:L] ;
             obj.callbackRef = [skin luaUnref:refTable ref:obj.callbackRef] ;
             obj = nil ;
         }
@@ -502,7 +502,7 @@ static luaL_Reg moduleLib[] = {
 int luaopen_hs__asm_guitk_element_image(lua_State* L) {
     defineInternalDictionaryies() ;
 
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     refTable = [skin registerLibraryWithObject:USERDATA_TAG
                                      functions:moduleLib
                                  metaFunctions:nil    // or module_metaLib

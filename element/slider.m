@@ -45,7 +45,7 @@ static int refTable = LUA_NOREF;
 
 - (void)callbackHamster:(NSArray *)messageParts { // does the "heavy lifting"
     if (_callbackRef != LUA_NOREF) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
         [skin pushLuaRef:refTable ref:_callbackRef] ;
         for (id part in messageParts) [skin pushNSObject:part] ;
         if (![skin protectedCallAndTraceback:(int)messageParts.count nresults:0]) {
@@ -55,7 +55,7 @@ static int refTable = LUA_NOREF;
         }
     } else {
         // allow next responder a chance since we don't have a callback set
-        id nextInChain = [self nextResponder] ;
+        NSObject *nextInChain = [self nextResponder] ;
         if (nextInChain) {
             SEL passthroughCallback = NSSelectorFromString(@"performPassthroughCallback:") ;
             if ([nextInChain respondsToSelector:passthroughCallback]) {
@@ -88,7 +88,7 @@ static int refTable = LUA_NOREF;
 /// Notes:
 ///  * In most cases, setting the frame is not necessary and will be overridden when the element is assigned to a manager or to a `hs._asm.guitk` window.
 static int slider_new(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
 
     NSRect frameRect = (lua_gettop(L) == 1) ? [skin tableToRectAtIndex:1] : NSZeroRect ;
@@ -118,7 +118,7 @@ static int slider_new(lua_State *L) {
 /// Notes:
 ///  * The slider callback will receive two arguments and should return none. The arguments will be the sliderObject userdata and the value represented by the sliders new position -- see [hs._asm.guitk.element.slider:value](#value)
 static int slider_callback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TFUNCTION | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
 
@@ -152,7 +152,7 @@ static int slider_callback(lua_State *L) {
 /// Notes:
 ///  * has no effect if [hs._asm.guitk.element.slider:tickMarks](#tickMarks) is 0
 static int slider_allowsTickMarkValuesOnly(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
 
@@ -178,7 +178,7 @@ static int slider_allowsTickMarkValuesOnly(lua_State *L) {
 /// Notes:
 ///  * If this value is 0, holding down the alt (option) key while clicking on the slider has the same effect that not holding down the modifier does: the slider jumps to the position where the click occurs.
 static int slider_altIncrementValue(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
 
@@ -206,7 +206,7 @@ static int slider_altIncrementValue(lua_State *L) {
 ///  * If the value is less than [hs._asm.guitk.element.slider:min](#min), then it will be set to the minimum instead.
 ///  * If the value is greater than [hs._asm.guitk.element.slider:max](#max), then it will be set to the maximum instead.
 static int slider_currentValue(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
 
@@ -232,7 +232,7 @@ static int slider_currentValue(lua_State *L) {
 /// Notes:
 ///  * If this value is less than [hs._asm.guitk.element.slider:min](#min), the behavior of the slider is undefined.
 static int slider_maxValuee(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
 
@@ -258,7 +258,7 @@ static int slider_maxValuee(lua_State *L) {
 /// Notes:
 ///  * If this value is greater than [hs._asm.guitk.element.slider:max](#max), the behavior of the slider is undefined.
 static int slider_minValue(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
 
@@ -285,7 +285,7 @@ static int slider_minValue(lua_State *L) {
 ///  * If the slider is linear, the tick marks will be arranged at equal intervals along the slider. If the slider is circular, a single tick mark will be displayed at the top of the slider for any number passed in that is greater than 0 -- see [hs._asm.guitk.element.slider:type](#type).
 ///  * A circular slider with [hs._asm.guitk.element.slider:tickMarksOnly](#tickMarksOnly) set to true will still be limited to the number of discrete intervals specified by the value set by this method, even though the specific tick marks are not visible.
 static int slider_numberOfTickMarks(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TINTEGER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
 
@@ -312,7 +312,7 @@ static int slider_numberOfTickMarks(lua_State *L) {
 /// Notes:
 ///  * The length of a linear slider will expand to fill the dimension appropriate based on the value of [hs._asm.guitk.element.slider:vertical](#vertical); a circular slider will be anchored to the lower right corner of the element's frame.
 static int slider_sliderType(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
 
@@ -356,7 +356,7 @@ static int slider_sliderType(lua_State *L) {
 ///  * This method has no effect on a circular slider -- see [hs._asm.guitk.element.slider:type](#type).
 ///  * If [hs._asm.guitk.element.slider:tickMarks](#tickMarks) is 0, this method has no effect.
 static int slider_tickMarkPosition(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
 
@@ -402,7 +402,7 @@ static int slider_tickMarkPosition(lua_State *L) {
 ///  * This method is only available in macOS 10.12.1 and newer.
 ///  * This method currently appears to have no effect on the visual appearance on the slider; as it was added to the macOS API in 10.12.1, it is suspected that this may be supported in the future and is included here for when that happens.
 static int slider_trackFillColor(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TTABLE | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
 
@@ -446,7 +446,7 @@ static int slider_trackFillColor(lua_State *L) {
 /// Notes:
 ///  * The thickness is defined to be the extent of the knob along the long dimension of the bar. In a vertical slider, a knob’s thickness is its height; in a horizontal slider, a knob’s thickness is its width.
 static int slider_knobThickness(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
 
@@ -467,7 +467,7 @@ static int slider_knobThickness(lua_State *L) {
 /// Notes:
 ///  * This method has no effect on a circular slider -- see [hs._asm.guitk.element.slider:type](#type).
 static int slider_vertical(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
 
@@ -494,7 +494,7 @@ static int slider_vertical(lua_State *L) {
 /// Returns:
 ///  * the number represented by the specified tick mark.
 static int slider_tickMarkValueAtIndex(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TINTEGER, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
     lua_Integer index = lua_tointeger(L, 2) ;
@@ -525,7 +525,7 @@ static int slider_tickMarkValueAtIndex(lua_State *L) {
 ///  * Returns `value` if the slider has no tick marks
 ///  * See also [hs._asm.guitk.element.slider:closestTickMark](#closestTickMark)
 static int slider_closestTickMarkValueToValue(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
 
@@ -547,7 +547,7 @@ static int slider_closestTickMarkValueToValue(lua_State *L) {
 ///  * Returns 0 if the slider has no tick marks
 ///  * See also [hs._asm.guitk.element.slider:closestTickMarkValue](#closestTickMarkValue)
 static int slider_closestTickMarkToValue(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
     double value = [slider closestTickMarkValueToValue:lua_tonumber(L, 2)] ;
@@ -582,7 +582,7 @@ static int slider_closestTickMarkToValue(lua_State *L) {
 /// Returns:
 ///  * a frame table specifying the tick mark's location within the element's frame. The frame coordinates will be relative to the top left corner of the slider's frame in it's parent.
 static int slider_rectOfTickMarkAtIndex(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TINTEGER, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
     lua_Integer index = lua_tointeger(L, 2) ;
@@ -633,7 +633,7 @@ static int slider_rectOfTickMarkAtIndex(lua_State *L) {
 /// ~~~
 ///  * A more efficient solution is being considered that would allow limiting tracking to only those elements one is interested in but there is no specific eta at this point.
 static int slider_indexOfTickMarkAtPoint(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TTABLE, LS_TBREAK] ;
     HSASMGUITKElementSlider *slider = [skin toNSObjectAtIndex:1] ;
 
@@ -663,7 +663,7 @@ static int pushHSASMGUITKElementSlider(lua_State *L, id obj) {
 }
 
 id toHSASMGUITKElementSliderFromLua(lua_State *L, int idx) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementSlider *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {
         value = get_objectFromUserdata(__bridge HSASMGUITKElementSlider, L, idx, USERDATA_TAG) ;
@@ -677,7 +677,7 @@ id toHSASMGUITKElementSliderFromLua(lua_State *L, int idx) {
 #pragma mark - Hammerspoon/Lua Infrastructure
 
 static int userdata_tostring(lua_State* L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementSlider *obj = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKElementSlider"] ;
     NSString *title = NSStringFromRect(obj.frame) ;
     [skin pushNSObject:[NSString stringWithFormat:@"%s: %@ (%p)", USERDATA_TAG, title, lua_topointer(L, 1)]] ;
@@ -688,7 +688,7 @@ static int userdata_eq(lua_State* L) {
 // can't get here if at least one of us isn't a userdata type, and we only care if both types are ours,
 // so use luaL_testudata before the macro causes a lua error
     if (luaL_testudata(L, 1, USERDATA_TAG) && luaL_testudata(L, 2, USERDATA_TAG)) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:L] ;
         HSASMGUITKElementSlider *obj1 = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKElementSlider"] ;
         HSASMGUITKElementSlider *obj2 = [skin luaObjectAtIndex:2 toClass:"HSASMGUITKElementSlider"] ;
         lua_pushboolean(L, [obj1 isEqualTo:obj2]) ;
@@ -703,7 +703,8 @@ static int userdata_gc(lua_State* L) {
     if (obj) {
         obj.selfRefCount-- ;
         if (obj.selfRefCount == 0) {
-            obj.callbackRef = [[LuaSkin shared] luaUnref:refTable ref:obj.callbackRef] ;
+            LuaSkin *skin = [LuaSkin sharedWithState:L] ;
+            obj.callbackRef = [skin luaUnref:refTable ref:obj.callbackRef] ;
             obj = nil ;
         }
     }
@@ -757,7 +758,7 @@ static luaL_Reg moduleLib[] = {
 
 // NOTE: ** Make sure to change luaopen_..._internal **
 int luaopen_hs__asm_guitk_element_slider(lua_State* L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     refTable = [skin registerLibraryWithObject:USERDATA_TAG
                                      functions:moduleLib
                                  metaFunctions:nil    // or module_metaLib

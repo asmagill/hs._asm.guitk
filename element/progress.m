@@ -112,7 +112,7 @@ static void defineInternalDictionaryies() {
 ///
 ///  * The bar progress indicator type does not have a default width; if you are assigning the progress element to an `hs._asm.guitk.manager`, be sure to specify a width in the frame details or the element may not be visible.
 static int progress_new(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
 
     NSRect frameRect = (lua_gettop(L) == 1) ? [skin tableToRectAtIndex:1] : NSZeroRect ;
@@ -142,7 +142,7 @@ static int progress_new(lua_State *L) {
 /// Notes:
 ///  * This method has no effect if the indicator is not indeterminate.
 static int progress_start(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK] ;
     HSASMGUITKElementProgress *progress = [skin toNSObjectAtIndex:1] ;
     [progress startAnimation:nil];
@@ -163,7 +163,7 @@ static int progress_start(lua_State *L) {
 /// Notes:
 ///  * This method has no effect if the indicator is not indeterminate.
 static int progress_stop(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBREAK] ;
     HSASMGUITKElementProgress *progress = [skin toNSObjectAtIndex:1] ;
     [progress stopAnimation:nil];
@@ -185,7 +185,7 @@ static int progress_stop(lua_State *L) {
 ///  * The default setting for this is true.
 ///  * If this flag is set to false, the indicator animation speed may fluctuate as Hammerspoon performs other activities, though not reliably enough to provide an "activity level" feedback indicator.
 static int progress_threaded(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementProgress *progress = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 2) {
@@ -211,7 +211,7 @@ static int progress_threaded(lua_State *L) {
 ///  * The default setting for this is true.
 ///  * If this setting is set to false, you should also take a look at [hs._asm.guitk.element.progress:min](#min) and [hs._asm.guitk.element.progress:max](#max), and periodically update the status with [hs._asm.guitk.element.progress:value](#value) or [hs._asm.guitk.element.progress:increment](#increment)
 static int progress_indeterminate(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementProgress *progress = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 2) {
@@ -237,7 +237,7 @@ static int progress_indeterminate(lua_State *L) {
 ///  * The default setting for this is true.
 ///  * In my testing, this setting does not seem to have much, if any, effect on the visual aspect of the indicator and is provided in this module in case this changes in a future OS X update (there are some indications that it may have had a greater effect in previous versions).
 static int progress_bezeled(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementProgress *progress = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 2) {
@@ -262,7 +262,7 @@ static int progress_bezeled(lua_State *L) {
 /// Notes:
 ///  * The default setting for this is true.
 static int progress_displayedWhenStopped(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementProgress *progress = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 2) {
@@ -291,7 +291,7 @@ static int progress_displayedWhenStopped(lua_State *L) {
 ///  * An indeterminate progress indicator is displayed as a rounded rectangle with a moving pulse.
 ///  * A determinate progress indicator is displayed as a rounded rectangle that fills up as its value increases.
 static int progress_circular(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementProgress *progress = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 2) {
@@ -319,7 +319,7 @@ static int progress_circular(lua_State *L) {
 ///  * This value has no effect on the display of an indeterminate progress indicator.
 ///  * For a determinate indicator, this will affect how "filled" the bar or circle is.  If the value is lower than [hs._asm.guitk.element.progress:min](#min), then it will be set to the current minimum value.  If the value is greater than [hs._asm.guitk.element.progress:max](#max), then it will be set to the current maximum value.
 static int progress_value(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementProgress *progress = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 2) {
@@ -346,7 +346,7 @@ static int progress_value(lua_State *L) {
 ///  * This value has no effect on the display of an indeterminate progress indicator.
 ///  * For a determinate indicator, the behavior is undefined if this value is greater than [hs._asm.guitk.element.progress:max](#max).
 static int progress_min(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementProgress *progress = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 2) {
@@ -373,7 +373,7 @@ static int progress_min(lua_State *L) {
 ///  * This value has no effect on the display of an indeterminate progress indicator.
 ///  * For a determinate indicator, the behavior is undefined if this value is less than [hs._asm.guitk.element.progress:min](#min).
 static int progress_max(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementProgress *progress = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 2) {
@@ -398,7 +398,7 @@ static int progress_max(lua_State *L) {
 /// Notes:
 ///  * Programmatically, this is equivalent to `hs._asm.guitk.element.progress:value(hs._asm.guitk.element.progress:value() + value)`, but is faster.
 static int progress_increment(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER, LS_TBREAK] ;
     HSASMGUITKElementProgress *progress = [skin toNSObjectAtIndex:1] ;
     [progress incrementBy:lua_tonumber(L, 2)] ;
@@ -420,7 +420,7 @@ static int progress_increment(lua_State *L) {
 ///  * The default setting for this is "default".
 ///  * In my testing, this setting does not seem to have much, if any, effect on the visual aspect of the indicator and is provided in this module in case this changes in a future OS X update (there are some indications that it may have had an effect in previous versions).
 static int progress_controlTint(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementProgress *progress = [skin toNSObjectAtIndex:1] ;
 
@@ -462,7 +462,7 @@ static int progress_controlTint(lua_State *L) {
 ///  * For circular indicators, the sizes seem to be 32x32, 16x16, and 10x10 in 10.11.
 ///  * For bar indicators, the height seems to be 20 and 12; the mini size seems to be ignored, at least in 10.11.
 static int progress_controlSize(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementProgress *progress = [skin toNSObjectAtIndex:1] ;
 
@@ -504,7 +504,7 @@ static int progress_controlSize(lua_State *L) {
 ///  * This method is not based upon the methods inherent in the NSProgressIndicator Objective-C class, but rather on code found at http://stackoverflow.com/a/32396595 utilizing a CIFilter object to adjust the view's output.
 ///  * When a color is applied to a bar indicator, the visible pulsing of the bar is no longer visible; this is a side effect of applying the filter to the view and no workaround is currently known.
 static int progress_customColor(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TTABLE | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementProgress *progress = [skin toNSObjectAtIndex:1] ;
 
@@ -514,7 +514,8 @@ static int progress_customColor(lua_State *L) {
         if (lua_type(L, 2) == LUA_TNIL) {
             progress.customColor = nil ;
         } else {
-            NSColor *theColor = [[skin luaObjectAtIndex:2 toClass:"NSColor"] colorUsingColorSpaceName:NSCalibratedRGBColorSpace] ;
+            NSColor *argColor = [skin luaObjectAtIndex:2 toClass:"NSColor"]  ;
+            NSColor *theColor = [argColor colorUsingColorSpaceName:NSCalibratedRGBColorSpace] ;
             if (theColor) {
                 progress.customColor = theColor ;
             } else {
@@ -543,7 +544,7 @@ static int pushHSASMGUITKElementProgress(lua_State *L, id obj) {
 }
 
 id toHSASMGUITKElementProgressFromLua(lua_State *L, int idx) {
-    LuaSkin *skin = [LuaSkin shared]  ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     HSASMGUITKElementProgress *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {
         value = get_objectFromUserdata(__bridge HSASMGUITKElementProgress, L, idx, USERDATA_TAG) ;
@@ -557,7 +558,7 @@ id toHSASMGUITKElementProgressFromLua(lua_State *L, int idx) {
 #pragma mark - Hammerspoon/Lua Infrastructure
 
 static int userdata_tostring(lua_State* L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementProgress *obj = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKElementProgress"] ;
     NSString *title = nil ;
     if ([obj isIndeterminate]) {
@@ -575,7 +576,7 @@ static int userdata_eq(lua_State* L) {
 // can't get here if at least one of us isn't a userdata type, and we only care if both types are ours,
 // so use luaL_testudata before the macro causes a lua error
     if (luaL_testudata(L, 1, USERDATA_TAG) && luaL_testudata(L, 2, USERDATA_TAG)) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:L] ;
         HSASMGUITKElementProgress *obj1 = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKElementProgress"] ;
         HSASMGUITKElementProgress *obj2 = [skin luaObjectAtIndex:2 toClass:"HSASMGUITKElementProgress"] ;
         lua_pushboolean(L, [obj1 isEqualTo:obj2]) ;
@@ -641,7 +642,7 @@ static luaL_Reg moduleLib[] = {
 int luaopen_hs__asm_guitk_element_progress(lua_State* L) {
     defineInternalDictionaryies() ;
 
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     refTable = [skin registerLibraryWithObject:USERDATA_TAG
                                      functions:moduleLib
                                  metaFunctions:nil    // or module_metaLib

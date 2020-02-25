@@ -125,7 +125,7 @@ static void defineInternalDictionaryies() {
     if (!answer) answer = [NSString stringWithFormat:@"unrecognized button state %@", state] ;
 
     if (_callbackRef != LUA_NOREF) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:NULL] ;
         [skin pushLuaRef:refTable ref:_callbackRef] ;
         [skin pushNSObject:button] ;
         [skin pushNSObject:answer] ;
@@ -136,7 +136,7 @@ static void defineInternalDictionaryies() {
         }
     } else {
         // allow next responder a chance since we don't have a callback set
-        id nextInChain = [self nextResponder] ;
+        NSObject *nextInChain = [self nextResponder] ;
         if (nextInChain) {
             SEL passthroughCallback = NSSelectorFromString(@"performPassthroughCallback:") ;
             if ([nextInChain respondsToSelector:passthroughCallback]) {
@@ -183,7 +183,7 @@ static void defineInternalDictionaryies() {
 ///    * [hs._asm.guitk.element.button.checkbox](#checkbox)
 ///    * [hs._asm.guitk.element.button.radioButton](#radioButton)
 static int button_newButtonType(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TSTRING, LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
 
     NSString *key = [skin toNSObjectAtIndex:1] ;
@@ -229,7 +229,7 @@ static int button_newButtonType(lua_State *L) {
 ///    * [hs._asm.guitk.element.button.buttonWithTitleAndImage](#buttonWithTitleAndImage)
 ///    * [hs._asm.guitk.element.button.buttonWithImage](#buttonWithImage)
 static int button_newButtonWithTitle(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TSTRING, LS_TBREAK] ;
     NSString *title = [skin toNSObjectAtIndex:1] ;
 
@@ -289,7 +289,7 @@ static int button_newButtonWithTitle(lua_State *L) {
 ///    * [hs._asm.guitk.element.button.buttonWithTitle](#buttonWithTitle)
 ///    * [hs._asm.guitk.element.button.buttonWithImage](#buttonWithImage)
 static int button_newButtonWithTitleAndImage(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TSTRING, LS_TUSERDATA, "hs.image", LS_TBREAK] ;
     NSString *title = [skin toNSObjectAtIndex:1] ;
     NSImage  *image = [skin toNSObjectAtIndex:2] ;
@@ -352,7 +352,7 @@ static int button_newButtonWithTitleAndImage(lua_State *L) {
 ///    * [hs._asm.guitk.element.button.buttonWithTitle](#buttonWithTitle)
 ///    * [hs._asm.guitk.element.button.buttonWithTitleAndImage](#buttonWithTitleAndImage)
 static int button_newButtonWithImage(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, "hs.image", LS_TBREAK] ;
     NSImage  *image = [skin toNSObjectAtIndex:1] ;
 
@@ -410,7 +410,7 @@ static int button_newButtonWithImage(lua_State *L) {
 ///
 ///  * See also [hs._asm.guitk.element.button.buttonType](#buttonType)
 static int button_newButtonWithCheckbox(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TSTRING, LS_TBREAK] ;
     NSString *title = [skin toNSObjectAtIndex:1] ;
 
@@ -471,7 +471,7 @@ static int button_newButtonWithCheckbox(lua_State *L) {
 ///    * [hs._asm.guitk.element.button.radioButtonSet](#radioBUttonSet)
 ///    * [hs._asm.guitk.element.button.buttonType](#buttonType)
 static int button_newButtonWithRadiobutton(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TSTRING, LS_TBREAK] ;
     NSString *title = [skin toNSObjectAtIndex:1] ;
 
@@ -524,7 +524,7 @@ static int button_newButtonWithRadiobutton(lua_State *L) {
 /// Notes:
 ///  * The button callback will receive two arguments and should return none. The arguments will be the buttonObject userdata and the new button state -- see [hs._asm.guitk.element.button:state](#state)
 static int button_callback(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TFUNCTION | LS_TNIL | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *obj = [skin toNSObjectAtIndex:1] ;
 
@@ -563,7 +563,7 @@ static int button_callback(lua_State *L) {
 ///
 ///  * The button constructors which allow specifying a title require a string; if you wish to change to a styled text object, you'll need to invoke this method on the new object after it is constructed.
 static int button_title(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
 
@@ -609,7 +609,7 @@ static int button_title(lua_State *L) {
 ///    * "radio"           - when the radio button is selected, it will display its alternateTitle, if one has been assigned
 ///  * Other button types have not been observed to use this attribute; if you believe you have discovered something we have missed here, please submit an issue to the Hamemrspoon github web site.
 static int button_alternateTitle(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
 
@@ -645,7 +645,7 @@ static int button_alternateTitle(lua_State *L) {
 /// Notes:
 ///  * setting this to true for the "switch" or "radio" button types will prevent the alternate image, if defined, from being displayed.
 static int button_bordered(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
 
@@ -668,7 +668,7 @@ static int button_bordered(lua_State *L) {
 /// Returns:
 ///  * if a value is provided, returns the buttonObject ; otherwise returns the current value.
 static int button_transparent(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
 
@@ -695,7 +695,7 @@ static int button_transparent(lua_State *L) {
 ///  * Has no effect on buttons of type "switch" or "radio"
 ///  * Changing this value will not affect whether or not the border is currently being displayed until the cursor actually hovers over the button or the button is clicked by the user. To keep the visual display in sync, make sure to set this value before displaying the guitk (e.g. `hs._asm.guitk:show()`) or set the border manually to the initial state you wish with [hs._asm.guitk.element.button:bordered](#bordered).
 static int button_borderOnHover(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
 
@@ -722,7 +722,7 @@ static int button_borderOnHover(lua_State *L) {
 ///  * Mixed state is typically useful only with buttons of type "switch" or "radio" and is primarily used to indicate that something is only applied partially, e.g. when part of a selection of text is bold but not all of it. When a checkbox or radio button is in the "mixed" state, it is displayed with a dash instead of an X or a filled in radio button.
 ///  * See also [hs._asm.guitk.element.button:state](#state)
 static int button_allowsMixedState(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
 
@@ -758,7 +758,7 @@ static int button_allowsMixedState(lua_State *L) {
 /// Returns:
 ///  * if a value is provided, returns the buttonObject ; otherwise returns the current value.
 static int button_bezelStyle(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
 
@@ -805,7 +805,7 @@ static int button_bezelStyle(lua_State *L) {
 /// Returns:
 ///  * if a value is provided, returns the buttonObject ; otherwise returns the current value.
 static int button_imagePosition(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
 
@@ -846,7 +846,7 @@ static int button_imagePosition(lua_State *L) {
 /// Returns:
 ///  * if a value is provided, returns the buttonObject ; otherwise returns the current value.
 static int button_imageScaling(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
 
@@ -886,7 +886,7 @@ static int button_imageScaling(lua_State *L) {
 /// Notes:
 ///  * For buttons which change their appearance based upon their state, this is the image which will be displayed when the button is in its "off" state.
 static int button_image(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
 
@@ -914,7 +914,7 @@ static int button_image(lua_State *L) {
 /// Returns:
 ///  * if a value is provided, returns the buttonObject ; otherwise returns the current value.
 static int button_sound(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
 
@@ -951,7 +951,7 @@ static int button_sound(lua_State *L) {
 ///    * "radio"           - when the radio button is selected, it will display its alternateImage as the filled in radio button, if one has been assigned
 ///  * Other button types have not been observed to use this attribute; if you believe you have discovered something we have missed here, please submit an issue to the Hamemrspoon github web site.
 static int button_alternateImage(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TANY | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
 
@@ -983,7 +983,7 @@ static int button_alternateImage(lua_State *L) {
 ///  * Setting the state to "mixed" is only valid when [hs._asm.guitk.element.button:allowsMixedState](#allowsMixedState) is set to true.
 ///  * Mixed state is typically useful only with buttons of type "switch" or "radio" and is primarily used to indicate that something is only applied partially, e.g. when part of a selection of text is bold but not all of it. When a checkbox or radio button is in the "mixed" state, it is displayed with a dash instead of an X or a filled in radio button.
 static int button_state(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TSTRING | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
 
@@ -1027,7 +1027,7 @@ static int button_state(lua_State *L) {
 /// Notes:
 ///  * Highlighting makes the button appear recessed, displays its alternate title or image, or causes the button to appear illuminated.
 static int button_highlighted(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
     if (lua_gettop(L) == 1) {
@@ -1056,7 +1056,7 @@ static int button_highlighted(lua_State *L) {
 ///
 ///  * If the button is of the "multiLevelAccelerator" type and the user is using a Force Touch capable trackpad, this method will return a number between 0 (not being pressed) up to the value set for [hs._asm.guitk.element.button:maxAcceleratorLevel](#maxAcceleratorLevel), depending upon how much pressure is being applied to the button.
 static int button_value(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TBOOLEAN | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
 
@@ -1081,7 +1081,7 @@ static int button_value(lua_State *L) {
 /// Notes:
 ///  * This method and the "multiLevelAccelerator" button type are only supported in macOS 10.12 and newer.
 static int button_maxAcceleratorLevel(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TNUMBER | LS_TINTEGER | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
 
@@ -1135,7 +1135,7 @@ static float fclamp(float d, float min, float max) {
 ///    * the interval in seconds between subsequent callbacks after the first one has been invoked.
 ///  * Once the user releases the mouse button, a final callback will be invoked for the button and will reflect the new [hs._asm.guitk.element.button:state](#state) for the button.
 static int button_periodicDelay(lua_State *L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     [skin checkArgs:LS_TUSERDATA, USERDATA_TAG, LS_TTABLE | LS_TOPTIONAL, LS_TBREAK] ;
     HSASMGUITKElementButton *button = [skin toNSObjectAtIndex:1] ;
 
@@ -1184,7 +1184,7 @@ static int pushHSASMGUITKElementButton(lua_State *L, id obj) {
 }
 
 id toHSASMGUITKElementButtonFromLua(lua_State *L, int idx) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementButton *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {
         value = get_objectFromUserdata(__bridge HSASMGUITKElementButton, L, idx, USERDATA_TAG) ;
@@ -1198,7 +1198,7 @@ id toHSASMGUITKElementButtonFromLua(lua_State *L, int idx) {
 #pragma mark - Hammerspoon/Lua Infrastructure
 
 static int userdata_tostring(lua_State* L) {
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementButton *obj = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKElementButton"] ;
     NSString *title = NSStringFromRect(obj.frame) ;
     [skin pushNSObject:[NSString stringWithFormat:@"%s: %@ (%p)", USERDATA_TAG, title, lua_topointer(L, 1)]] ;
@@ -1209,7 +1209,7 @@ static int userdata_eq(lua_State* L) {
 // can't get here if at least one of us isn't a userdata type, and we only care if both types are ours,
 // so use luaL_testudata before the macro causes a lua error
     if (luaL_testudata(L, 1, USERDATA_TAG) && luaL_testudata(L, 2, USERDATA_TAG)) {
-        LuaSkin *skin = [LuaSkin shared] ;
+        LuaSkin *skin = [LuaSkin sharedWithState:L] ;
         HSASMGUITKElementButton *obj1 = [skin luaObjectAtIndex:1 toClass:"HSASMGUITKElementButton"] ;
         HSASMGUITKElementButton *obj2 = [skin luaObjectAtIndex:2 toClass:"HSASMGUITKElementButton"] ;
         lua_pushboolean(L, [obj1 isEqualTo:obj2]) ;
@@ -1224,7 +1224,7 @@ static int userdata_gc(lua_State* L) {
     if (obj) {
         obj.selfRefCount-- ;
         if (obj.selfRefCount == 0) {
-            LuaSkin *skin = [LuaSkin shared] ;
+            LuaSkin *skin = [LuaSkin sharedWithState:L] ;
             obj.callbackRef = [skin luaUnref:refTable ref:obj.callbackRef] ;
             obj = nil ;
         }
@@ -1287,7 +1287,7 @@ static luaL_Reg moduleLib[] = {
 int luaopen_hs__asm_guitk_element_button(lua_State* L) {
     defineInternalDictionaryies() ;
 
-    LuaSkin *skin = [LuaSkin shared] ;
+    LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     refTable = [skin registerLibraryWithObject:USERDATA_TAG
                                      functions:moduleLib
                                  metaFunctions:nil    // or module_metaLib
