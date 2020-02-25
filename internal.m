@@ -177,14 +177,16 @@ static inline NSRect RectWithFlippedYCoordinate(NSRect theRect) {
 - (void)performNotificationCallbackFor:(NSString *)message with:(NSNotification *)notification {
     if (_notificationCallback != LUA_NOREF && [_notifyFor containsObject:message]) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            LuaSkin *skin = [LuaSkin shared] ;
-            [skin pushLuaRef:refTable ref:self->_notificationCallback] ;
-            [skin pushNSObject:notification.object] ;
-            [skin pushNSObject:message] ;
-            if (![skin protectedCallAndTraceback:2 nresults:0]) {
-                NSString *errorMsg = [skin toNSObjectAtIndex:-1] ;
-                lua_pop([skin L], 1) ;
-                [skin logError:[NSString stringWithFormat:@"%s:%@ notification callback error:%@", USERDATA_TAG, message, errorMsg]] ;
+            if (self->_notificationCallback != LUA_NOREF) {
+                LuaSkin *skin = [LuaSkin shared] ;
+                [skin pushLuaRef:refTable ref:self->_notificationCallback] ;
+                [skin pushNSObject:notification.object] ;
+                [skin pushNSObject:message] ;
+                if (![skin protectedCallAndTraceback:2 nresults:0]) {
+                    NSString *errorMsg = [skin toNSObjectAtIndex:-1] ;
+                    lua_pop([skin L], 1) ;
+                    [skin logError:[NSString stringWithFormat:@"%s:%@ notification callback error:%@", USERDATA_TAG, message, errorMsg]] ;
+                }
             }
         }) ;
     }
