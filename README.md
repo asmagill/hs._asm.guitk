@@ -12,6 +12,8 @@ See `hs._asm.guitk.manager` for more information on how to populate a guitkObjec
 
 ### Installation
 
+*See https://github.com/asmagill/hammerspoon_asm/blob/master/README.md for details about building this module as a Universal library*
+
 A precompiled version of this module and its submodules can be found in this directory with a name along the lines of `guitk-v0.x.tar.gz`. This can be installed by downloading the file and then expanding it as follows:
 
 ~~~sh
