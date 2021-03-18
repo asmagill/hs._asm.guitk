@@ -5,7 +5,7 @@
 @import LuaSkin ;
 
 static const char * const USERDATA_TAG = "hs._asm.guitk" ;
-static int refTable = LUA_NOREF;
+static LSRefTable refTable = LUA_NOREF;
 
 static NSArray *guitkNotifications ;
 

@@ -411,7 +411,7 @@ int luaopen_hs__asm_guitk_element__control(lua_State* L) {
     defineInternalDictionaryies() ;
 
     LuaSkin *skin = [LuaSkin sharedWithState:L] ;
-    [skin registerLibrary:moduleLib metaFunctions:nil] ; // or module_metaLib
+    [skin registerLibrary:USERDATA_TAG functions:moduleLib metaFunctions:nil] ; // or module_metaLib
 
     [skin pushNSObject:@[
         @"font",

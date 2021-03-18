@@ -11,7 +11,7 @@ static void *CALLBACKREF_KEY  = @"HS_callbackRefKey" ;
 static void *SELFREFCOUNT_KEY = @"HS_selfRefCountKey" ;
 
 static const char * const USERDATA_TAG = "hs._asm.guitk.menubar.menu.item" ;
-static int refTable = LUA_NOREF;
+static LSRefTable refTable = LUA_NOREF;
 
 static NSDictionary *MENU_ITEM_STATES ;
 
