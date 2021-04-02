@@ -90,17 +90,17 @@ static inline NSRect RectWithFlippedYCoordinate(NSRect theRect) {
     }
 }
 
-- (NSString *)accessibilitySubrole {
-    if (_subroleOverride) {
-        if ([_subroleOverride isEqualToString:@""]) {
-            return [super accessibilitySubrole] ;
-        } else {
-            return _subroleOverride ;
-        }
-    } else {
-        return [[super accessibilitySubrole] stringByAppendingString:@".Hammerspoon"] ;
-    }
-}
+// - (NSString *)accessibilitySubrole {
+//     if (_subroleOverride) {
+//         if ([_subroleOverride isEqualToString:@""]) {
+//             return [super accessibilitySubrole] ;
+//         } else {
+//             return _subroleOverride ;
+//         }
+//     } else {
+//         return [[super accessibilitySubrole] stringByAppendingString:@".Hammerspoon"] ;
+//     }
+// }
 
 - (BOOL)canBecomeKeyWindow {
     return _allowKeyboardEntry ;
