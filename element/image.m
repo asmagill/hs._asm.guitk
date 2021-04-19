@@ -414,7 +414,7 @@ static int pushHSASMGUITKElementImage(lua_State *L, id obj) {
     return 1;
 }
 
-id toHSASMGUITKElementImageFromLua(lua_State *L, int idx) {
+static id toHSASMGUITKElementImageFromLua(lua_State *L, int idx) {
     LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementImage *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {

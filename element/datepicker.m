@@ -748,7 +748,7 @@ static int pushHSASMGUITKElementDatePicker(lua_State *L, id obj) {
     return 1;
 }
 
-id toHSASMGUITKElementDatePickerFromLua(lua_State *L, int idx) {
+static id toHSASMGUITKElementDatePickerFromLua(lua_State *L, int idx) {
     LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementDatePicker *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {

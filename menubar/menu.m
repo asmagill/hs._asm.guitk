@@ -486,7 +486,7 @@ static int pushHSMenu(lua_State *L, id obj) {
     return 1;
 }
 
-id toHSMenuFromLua(lua_State *L, int idx) {
+static id toHSMenuFromLua(lua_State *L, int idx) {
     LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSMenu *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {

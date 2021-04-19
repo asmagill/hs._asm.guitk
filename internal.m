@@ -1616,7 +1616,7 @@ static int pushHSASMGuiWindow(lua_State *L, id obj) {
     return 1;
 }
 
-id toHSASMGuiWindowFromLua(lua_State *L, int idx) {
+static id toHSASMGuiWindowFromLua(lua_State *L, int idx) {
     LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGuiWindow *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {

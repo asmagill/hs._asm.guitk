@@ -543,7 +543,7 @@ static int pushHSASMGUITKElementProgress(lua_State *L, id obj) {
     return 1;
 }
 
-id toHSASMGUITKElementProgressFromLua(lua_State *L, int idx) {
+static id toHSASMGUITKElementProgressFromLua(lua_State *L, int idx) {
     LuaSkin *skin = [LuaSkin sharedWithState:L]  ;
     HSASMGUITKElementProgress *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {

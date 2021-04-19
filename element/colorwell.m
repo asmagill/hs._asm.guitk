@@ -324,7 +324,7 @@ static int pushHSASMGUITKElementColorWell(lua_State *L, id obj) {
     return 1;
 }
 
-id toHSASMGUITKElementColorWellFromLua(lua_State *L, int idx) {
+static id toHSASMGUITKElementColorWellFromLua(lua_State *L, int idx) {
     LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementColorWell *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {

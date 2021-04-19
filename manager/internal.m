@@ -1504,7 +1504,7 @@ static int pushHSASMGUITKManager(lua_State *L, id obj) {
     return 1;
 }
 
-id toHSASMGUITKManagerFromLua(lua_State *L, int idx) {
+static id toHSASMGUITKManagerFromLua(lua_State *L, int idx) {
     LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKManager *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {

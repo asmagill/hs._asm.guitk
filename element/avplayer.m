@@ -1227,7 +1227,7 @@ static int pushHSASMGUITKElementAVPlayer(lua_State *L, id obj) {
     return 1;
 }
 
-id toHSASMGUITKElementAVPlayerFromLua(lua_State *L, int idx) {
+static id toHSASMGUITKElementAVPlayerFromLua(lua_State *L, int idx) {
     LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementAVPlayer *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {

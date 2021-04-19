@@ -1183,7 +1183,7 @@ static int pushHSASMGUITKElementButton(lua_State *L, id obj) {
     return 1;
 }
 
-id toHSASMGUITKElementButtonFromLua(lua_State *L, int idx) {
+static id toHSASMGUITKElementButtonFromLua(lua_State *L, int idx) {
     LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementButton *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {

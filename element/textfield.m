@@ -1093,7 +1093,7 @@ static int pushHSASMGUITKElementTextField(lua_State *L, id obj) {
     return 1;
 }
 
-id toHSASMGUITKElementTextFieldFromLua(lua_State *L, int idx) {
+static id toHSASMGUITKElementTextFieldFromLua(lua_State *L, int idx) {
     LuaSkin *skin = [LuaSkin sharedWithState:L] ;
     HSASMGUITKElementTextField *value ;
     if (luaL_testudata(L, idx, USERDATA_TAG)) {
