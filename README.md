@@ -1,5 +1,5 @@
 
-** 2023/10/1 -- This module is being archived. A replacement is in the works and can be found at [hs._asm.uitk](https://github.com/asmagill/hs._asm.uitk). **
+**2023/10/1 -- This module is being archived. A replacement is in the works and can be found at [hs._asm.uitk](https://github.com/asmagill/hs._asm.uitk).**
 
 - - -
 
